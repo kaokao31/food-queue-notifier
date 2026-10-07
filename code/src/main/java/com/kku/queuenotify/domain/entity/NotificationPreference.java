@@ -14,13 +14,11 @@ import lombok.*;
 public class NotificationPreference {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 1:1 — customer_id เป็น UNIQUE FK เพื่อบังคับ 1:1 จริง
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "id")
     private Customer customer;
 
     @Enumerated(EnumType.STRING)
