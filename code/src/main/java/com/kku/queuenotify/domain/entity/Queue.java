@@ -18,13 +18,11 @@ import java.util.List;
 public class Queue {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 1:1 — order_id เป็น UNIQUE FK
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "id")
     private Order order;
 
     @Column(name = "queue_number", nullable = false)
