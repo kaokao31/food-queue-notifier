@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ทดสอบแจ้งเตือนคิวอาหาร</title>
+</head>
+<body>
+    <h1>ทดสอบแจ้งเตือนคิวอาหาร</h1>
+    <p>เปิดด้วย Chrome บน Android และอนุญาตการแจ้งเตือน</p>
+
+    <button id="subscribe" disabled>เปิดรับแจ้งเตือน</button>
+    <button id="send-test" disabled>ส่งข้อความทดสอบถึงเครื่องนี้</button>
+    <p id="status" role="status">กำลังเตรียมระบบ...</p>
+
+    <script>
+        const button = document.getElementById("subscribe");
+        const testButton = document.getElementById("send-test");
+        const status = document.getElementById("status");
+
+        let registration;
+        let publicKey;
+
+        function toBytes(base64Url) {
+            const padding = "=".repeat((4 - base64Url.length % 4) % 4);
+            const base64 = (base64Url + padding)
+                .replace(/-/g, "+")
+                .replace(/_/g, "/");
+
+            return Uint8Array.from(
+                atob(base64),
+                character => character.charCodeAt(0)
+            );
+        }
+
+        async function prepare() {
+            if (!window.isSecureContext) {
+                throw new Error("ต้องเปิดผ่าน HTTPS หรือ localhost");
+            }
+
+            if (!("serviceWorker" in navigator)
+                    || !("PushManager" in window)
+                    || !("Notification" in window)) {
+                throw new Error("เบราว์เซอร์นี้ไม่รองรับ Web Push");
+            }
+
+            await navigator.serviceWorker.register("/sw.js");
+            registration = await navigator.serviceWorker.ready;
+
+            const response = await fetch("/api/v1/push/public-key");
+
+            if (!response.ok) {
+                throw new Error("ยังโหลดกุญแจสำหรับรับ Push ไม่สำเร็จ");
+            }
+
+            const data = await response.json();
+            publicKey = toBytes(data.publicKey);
+
+            button.disabled = false;
+            status.textContent = "พร้อมแล้ว กดปุ่มเพื่อเปิดรับแจ้งเตือน";
+        }
+
+        button.addEventListener("click", async () => {
+            button.disabled = true;
+
+            try {
+                const permission = await Notification.requestPermission();
+
+                if (permission !== "granted") {
+                    status.textContent =
+                        "ยังไม่ได้อนุญาตแจ้งเตือน กรุณาตรวจสิทธิ์ของเว็บไซต์";
+                    return;
+                }
+
+                let subscription =
+                    await registration.pushManager.getSubscription();
+
+                if (!subscription) {
+                    subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: publicKey
+                    });
+                }
+
+                const response = await fetch("/api/v1/push/subscriptions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(subscription)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || "บันทึกปลายทางรับแจ้งเตือนไม่สำเร็จ");
+                }
+
+                status.textContent =
+                    "สมัครสำเร็จ กดส่งข้อความทดสอบถึงเครื่องนี้ได้เลย";
+                testButton.disabled = false;
+            } catch (error) {
+                status.textContent = error.message;
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+        testButton.addEventListener("click", async () => {
+            testButton.disabled = true;
+            status.textContent = "กำลังส่ง Web Push...";
+            try {
+                const response = await fetch("/api/v1/push/subscriptions/test", {
+                    method: "POST",
+                    headers: { "X-Push-Demo": "true" }
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || "ส่งข้อความทดสอบไม่สำเร็จ");
+                }
+                status.textContent = data.message;
+            } catch (error) {
+                status.textContent = error.message;
+            } finally {
+                setTimeout(() => { testButton.disabled = false; }, 5000);
+            }
+        });
+
+        prepare().catch(error => {
+            status.textContent = error.message;
+        });
+    </script>
+</body>
+</html>

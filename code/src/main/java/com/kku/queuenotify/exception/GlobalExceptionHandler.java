@@ -1,5 +1,7 @@
 package com.kku.queuenotify.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,6 +13,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleNotFound(ResourceNotFoundException ex) {
@@ -33,6 +37,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception ex) {
+        // Log types and code locations only: exception messages may contain secrets.
+        Throwable cause = ex;
+        for (int depth = 0; cause != null && depth < 8; depth++) {
+            log.error("Unhandled error cause[{}]: {}", depth, cause.getClass().getName());
+            for (StackTraceElement frame : cause.getStackTrace()) {
+                log.error("  at {}", frame);
+            }
+            if (cause.getCause() == cause) {
+                break;
+            }
+            cause = cause.getCause();
+        }
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "เกิดข้อผิดพลาดที่ไม่คาดคิด");
     }
 
