@@ -9,3 +9,11 @@
 - develop: รวมงานระหว่างพัฒนา
 - สมาชิกทำงานบน branch ส่วนตัว
 - รวมงานผ่าน Pull Request และมีสมาชิกอีกคนรีวิว
+
+## Starting point
+
+นำเข้าโค้ดตั้งต้นจาก queue-notify-project.zip
+ประกอบด้วยโครง Entity, Design Patterns, Queue API และ Docker configuration
+
+ยังไม่ได้ยืนยันผล build และการเริ่มระบบ
+จะตรวจและปรับแก้ในขั้นตอนถัดไป

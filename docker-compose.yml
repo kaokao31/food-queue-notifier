@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: queue-notify-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: queuenotify
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - queue-notify-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: queue-notify-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 8080
+      DB_URL: jdbc:postgresql://db:5432/queuenotify
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      LINE_ACCESS_TOKEN: ${LINE_ACCESS_TOKEN:-}
+    ports:
+      - "8080:8080"
+
+volumes:
+  queue-notify-db-data:
