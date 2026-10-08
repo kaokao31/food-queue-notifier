@@ -1,20 +1,21 @@
 package com.kku.queuenotify.service.impl;
 
-import com.kku.queuenotify.domain.entity.Customer;
-import com.kku.queuenotify.service.NotificationStrategy;
-import lombok.extern.slf4j.Slf4j;
+import com.kku.queuenotify.dto.request.PushSubscriptionRequest;
+import com.kku.queuenotify.dto.response.PushPayload;
+import com.kku.queuenotify.service.*;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-/**
- * TODO: ต่อ Firebase Cloud Messaging (FCM) จริงเมื่อมี service account key
- */
-@Slf4j
 @Component
+@ConditionalOnProperty(name = "notification.mode", havingValue = "webpush", matchIfMissing = true)
 public class PushNotificationStrategy implements NotificationStrategy {
+  private final WebPushSender sender;
 
-    @Override
-    public NotificationResult send(Customer customer, String message) {
-        log.info("[PUSH-NOTIFY] to {}: {}", customer.getName(), message);
-        return new NotificationResult(true, "sent via push");
-    }
+  public PushNotificationStrategy(WebPushSender sender) {
+    this.sender = sender;
+  }
+
+  public int send(PushSubscriptionRequest sub, PushPayload payload) {
+    return sender.send(sub, payload);
+  }
 }
