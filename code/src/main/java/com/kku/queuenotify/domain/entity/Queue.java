@@ -2,14 +2,19 @@ package com.kku.queuenotify.domain.entity;
 
 import com.kku.queuenotify.domain.enums.QueueStatus;
 import jakarta.persistence.*;
-import lombok.*;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.*;
 
 @Entity
-@Table(name = "queue")
+@Table(
+    name = "queue",
+    uniqueConstraints =
+        @UniqueConstraint(
+            name = "uq_queue_date_number",
+            columnNames = {"queue_date", "queue_number"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,26 +22,35 @@ import java.util.List;
 @Builder
 public class Queue {
 
-    @Id
-    private Long id;
+  @Column(name = "token_hash", length = 64, unique = true)
+  private String tokenHash;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "id")
-    private Order order;
+  @Id private Long id;
 
-    @Column(name = "queue_number", nullable = false)
-    private Integer queueNumber;
+  @OneToOne(fetch = FetchType.LAZY)
+  @MapsId
+  @JoinColumn(name = "id")
+  private Order order;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private QueueStatus status;
+  @Column(name = "queue_number", nullable = false)
+  private Integer queueNumber;
 
-    @Column(name = "status_changed_at")
-    private LocalDateTime statusChangedAt;
+  @Column(name = "queue_date", nullable = false)
+  private LocalDate queueDate;
 
-    // 1:N
-    @OneToMany(mappedBy = "queue", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<NotificationLog> notificationLogs = new ArrayList<>();
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20)
+  private QueueStatus status;
+
+  @Column(name = "status_changed_at")
+  private LocalDateTime statusChangedAt;
+
+  // 1:N
+  @OneToMany(
+      mappedBy = "queue",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  @Builder.Default
+  private List<NotificationLog> notificationLogs = new ArrayList<>();
 }

@@ -1,9 +1,8 @@
 package com.kku.queuenotify.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.math.BigDecimal;
+import lombok.*;
 
 @Entity
 @Table(name = "menu_item")
@@ -14,19 +13,26 @@ import java.math.BigDecimal;
 @Builder
 public class MenuItem {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Column(name = "is_available", nullable = false)
+  @Builder.Default
+  private boolean available = true;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(length = 50)
-    private String category;
+  @Column(nullable = false, length = 100)
+  private String name;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+  @Column(length = 50)
+  private String category;
 
-    @Column(name = "prep_time_minutes")
-    private Integer prepTimeMinutes;
+  @Column(nullable = false, precision = 10, scale = 2)
+  private BigDecimal price;
+
+  @Column(name = "image_key", length = 64)
+  private String imageKey;
+
+  @Column(name = "prep_time_minutes")
+  private Integer prepTimeMinutes;
 }

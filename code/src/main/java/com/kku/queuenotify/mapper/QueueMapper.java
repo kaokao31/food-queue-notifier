@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class QueueMapper {
 
-    public QueueResponse toResponse(Queue queue) {
-        return new QueueResponse(
-                queue.getId(),
-                queue.getQueueNumber(),
-                queue.getStatus(),
-                queue.getStatusChangedAt()
-        );
-    }
+  public QueueResponse toResponse(Queue queue) {
+    return new QueueResponse(
+        queue.getId(),
+        queue.getQueueNumber(),
+        queue.getQueueDate(),
+        queue.getStatus(),
+        queue.getStatusChangedAt());
+  }
 }
