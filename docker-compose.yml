@@ -31,7 +31,12 @@ services:
       DB_URL: jdbc:postgresql://db:5432/queuenotify
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
-      LINE_ACCESS_TOKEN: ${LINE_ACCESS_TOKEN:-}
+      STAFF_USERNAME: ${STAFF_USERNAME:-staff}
+      STAFF_PASSWORD: ${STAFF_PASSWORD:?Set STAFF_PASSWORD (at least 12 characters)}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-push-demo}
     ports:
       - "8080:8080"
 
