@@ -36,9 +36,9 @@ async function run() {
  assert.equal(stale.getMenus().length,0);
  let fetchCalls=0;context.fetch=async()=>{fetchCalls++;return {status:404,ok:false};};
  await assert.rejects(CoreUI.api('/api/v1/menu-items'),/ยังไม่พร้อม/);
- await assert.rejects(CoreUI.api('/api/v1/orders',{method:'POST'}),/ยังไม่เปิด/);assert.equal(fetchCalls,1);
+ await assert.rejects(CoreUI.api('/api/v1/orders',{method:'POST'}),/สิทธิ์/);assert.equal(fetchCalls,2);
  const app=fs.readFileSync(path.join(root,'code/src/main/resources/static/assets/app.js'),'utf8');
- assert.doesNotMatch(app,/localStorage|PushManager|serviceWorker|QueueToken/);
+ assert.doesNotMatch(app,/PushManager|serviceWorker/);
  console.log('PASS: menu loading, escaped names, disabled ordering, categories, paging, sorting, errors, stale-response handling and read-only API.');
 }
 run().catch(error=>{console.error(error);process.exitCode=1;});

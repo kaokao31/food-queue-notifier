@@ -24,12 +24,12 @@
   const total = () => [...lines.values()].reduce((sum, line) => sum + line.cents * line.quantity, 0) / 100;
   return Object.freeze({add, setQuantity, remove, getItems, total});
  }
- function createBasket({elements, escapeHtml, money, onError = () => {}}) {
+ function createBasket({elements, escapeHtml, money, onError = () => {}, onChange = () => {}}) {
   const model = createBasketModel();
   function summary() {
    elements.total.textContent = money(model.total());
-   // Checkout is connected in the next step.
    elements.checkout.disabled = true;
+   onChange(isValid());
   }
   function draw() {
    elements.items.innerHTML = model.getItems().map(line => {
