@@ -1,0 +1,67 @@
+[
+  {
+    "slug": "egg-fried-rice",
+    "file": "egg-fried-rice-v2.avif",
+    "label": "ข้าวผัดไข่",
+    "source": "https://www.maggi.co.th/recipes/egg-fried-rice",
+    "originalFile": "a1b6cab9710d963ab0d30f62e5d3a88a.avif",
+    "bytes": 50527,
+    "sourceName": "MAGGI"
+  },
+  {
+    "slug": "basil-chicken",
+    "file": "basil-chicken-v2.webp",
+    "label": "ข้าวกะเพราไก่",
+    "source": "https://aroifin.com/recipes/kapraow-chicken/",
+    "originalFile": "cover-kapraow-chicken.webp",
+    "visibleCredit": "SGE",
+    "bytes": 165686,
+    "sourceName": "Aroifin"
+  },
+  {
+    "slug": "limeade",
+    "file": "limeade-v2.jpg",
+    "label": "น้ำมะนาว",
+    "source": "https://cooking.kapook.com/view180351.html",
+    "originalFile": "j1_10.jpg",
+    "visibleCredit": "Rin Silpachai",
+    "bytes": 35404,
+    "sourceName": "Kapook",
+    "additionalSources": [
+      {
+        "name": "Kapook — ม็อกเทลน้ำมะนาว",
+        "url": "https://cooking.kapook.com/view146659.html"
+      }
+    ]
+  },
+  {
+    "slug": "thai-tea",
+    "file": "thai-tea-v2.jpg",
+    "label": "ชาไทยเย็น",
+    "source": "https://food.trueid.net/detail/lowEGZYVj4d6",
+    "originalFile": "00a9fe30-ad7d-11eb-a73b-c395e0dfc07b_original.jpg",
+    "visibleCredit": "TrueID Food",
+    "bytes": 66250,
+    "sourceName": "TrueID Food"
+  },
+  {
+    "slug": "pad-thai",
+    "file": "pad-thai-v2.webp",
+    "label": "ผัดไทย",
+    "source": "https://aroifin.com/recipes/pad-thai/",
+    "originalFile": "cover-pad-thai.webp",
+    "visibleCredit": "SGE",
+    "bytes": 181430,
+    "sourceName": "Aroifin"
+  },
+  {
+    "slug": "crispy-chicken-rice",
+    "file": "crispy-chicken-rice-v2.jpg",
+    "label": "ข้าวไก่ทอด",
+    "source": "https://krua.co/recipe/fried-khao-man-gai",
+    "originalFile": "SlideBanner1140x507-161.jpg",
+    "visibleCredit": "",
+    "bytes": 119589,
+    "sourceName": "KRUA.CO"
+  }
+]
