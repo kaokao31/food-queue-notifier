@@ -31,7 +31,7 @@
   }
 
 
-  function createMenuBrowser({ request, elements, renderer, escapeHtml, onError = () => {} }) {
+  function createMenuBrowser({ request, elements, renderer, escapeHtml, onError = () => {}, interactive = false, onRendered = () => {} }) {
     const state = {page:0, category:'ทั้งหมด', menus:[], totalPages:0, busy:false};
     let revision = 0;
     function pager() {
@@ -41,7 +41,8 @@
     }
     function draw() {
       const visible = state.category === 'ทั้งหมด' ? state.menus : state.menus.filter(menu => menu.category === state.category);
-      elements.grid.innerHTML = visible.map(menu => renderer(menu, false, false)).join('') || '<p class="empty">ไม่มีเมนูในหมวดนี้</p>';
+      elements.grid.innerHTML = visible.map(menu => renderer(menu, false, interactive)).join('') || '<p class="empty">ไม่มีเมนูในหมวดนี้</p>';
+      onRendered(visible);
     }
     function categories() {
       const names = ['ทั้งหมด', ...new Set(state.menus.map(menu => menu.category).filter(Boolean))];
