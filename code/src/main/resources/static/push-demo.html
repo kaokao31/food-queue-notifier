@@ -14,6 +14,14 @@
     <p id="status" role="status">กำลังเตรียมระบบ...</p>
 
     <script>
+const nativeFetch=window.fetch.bind(window);
+window.fetch=async (url,options={})=>{
+ if(options.method && options.method.toUpperCase()!=='GET'){
+  const r=await nativeFetch('/api/v1/csrf');const token=await r.json();
+  options.headers={...options.headers,[token.headerName]:token.token};
+ }
+ return nativeFetch(url,options);
+};
         const button = document.getElementById("subscribe");
         const testButton = document.getElementById("send-test");
         const status = document.getElementById("status");
