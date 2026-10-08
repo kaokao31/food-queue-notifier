@@ -1,9 +1,8 @@
 package com.kku.queuenotify.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.math.BigDecimal;
+import lombok.*;
 
 @Entity
 @Table(name = "order_item")
@@ -14,21 +13,27 @@ import java.math.BigDecimal;
 @Builder
 public class OrderItem {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
+  private BigDecimal unitPrice;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+  @Column(name = "menu_item_name", nullable = false, length = 100)
+  private String menuItemName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menu_item_id", nullable = false)
-    private MenuItem menuItem;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private Integer quantity;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "order_id", nullable = false)
+  private Order order;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal subtotal;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "menu_item_id", nullable = false)
+  private MenuItem menuItem;
+
+  @Column(nullable = false)
+  private Integer quantity;
+
+  @Column(nullable = false, precision = 10, scale = 2)
+  private BigDecimal subtotal;
 }

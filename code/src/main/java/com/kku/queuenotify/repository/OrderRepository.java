@@ -1,10 +1,11 @@
 package com.kku.queuenotify.repository;
 
 import com.kku.queuenotify.domain.entity.Order;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.kku.queuenotify.domain.enums.QueueStatus;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.repository.*;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    Page<Order> findByCustomerId(Long customerId, Pageable pageable);
+  @Query("select o from Order o join o.queue q where (:status is null or q.status=:status)")
+  Page<Order> list(QueueStatus status, Pageable page);
 }
