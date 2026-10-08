@@ -30,5 +30,51 @@
     };
   }
 
-  root.MenuUI = Object.freeze({ foodPhoto, createMenuRenderer });
+
+  function createMenuBrowser({ request, elements, renderer, escapeHtml, onError = () => {} }) {
+    const state = {page:0, category:'ทั้งหมด', menus:[], totalPages:0, busy:false};
+    let revision = 0;
+    function pager() {
+      elements.prev.disabled = state.busy || state.page === 0;
+      elements.next.disabled = state.busy || state.page + 1 >= state.totalPages;
+      elements.pageInfo.textContent = `หน้า ${state.page + 1} / ${Math.max(1, state.totalPages)}`;
+    }
+    function draw() {
+      const visible = state.category === 'ทั้งหมด' ? state.menus : state.menus.filter(menu => menu.category === state.category);
+      elements.grid.innerHTML = visible.map(menu => renderer(menu, false, false)).join('') || '<p class="empty">ไม่มีเมนูในหมวดนี้</p>';
+    }
+    function categories() {
+      const names = ['ทั้งหมด', ...new Set(state.menus.map(menu => menu.category).filter(Boolean))];
+      if (!names.includes(state.category)) state.category = 'ทั้งหมด';
+      elements.categories.innerHTML = names.map(name => `<button class="${name === state.category ? 'active' : ''}">${escapeHtml(name)}</button>`).join('');
+      elements.categories.querySelectorAll('button').forEach(button => {
+        button.onclick = () => {state.category = button.textContent; categories(); draw();};
+      });
+    }
+    async function load() {
+      const current = ++revision;
+      state.busy = true; elements.sort.disabled = true; pager();
+      elements.grid.textContent = 'กำลังโหลดเมนู…';
+      try {
+        const data = await request('/api/v1/menu-items?size=8&page=' + state.page + '&sort=' + encodeURIComponent(elements.sort.value));
+        if (current !== revision) return;
+        if (!Array.isArray(data.content) || !Number.isInteger(data.page) || data.page < 0 || !Number.isInteger(data.totalPages) || data.totalPages < 0) throw new Error('รูปแบบข้อมูลเมนูไม่ถูกต้อง');
+        state.page = data.page; state.totalPages = data.totalPages; state.menus = data.content;
+        categories(); draw();
+      } catch (error) {
+        if (current !== revision) return;
+        state.menus = []; state.totalPages = 0;
+        elements.categories.innerHTML = ''; elements.grid.textContent = error.message;
+        onError(error.message);
+      } finally {
+        if (current === revision) {state.busy = false; elements.sort.disabled = false; pager();}
+      }
+    }
+    elements.prev.onclick = () => {if (!state.busy && state.page > 0) {state.page--; void load();}};
+    elements.next.onclick = () => {if (!state.busy && state.page + 1 < state.totalPages) {state.page++; void load();}};
+    elements.sort.onchange = () => {state.page = 0; void load();};
+    return Object.freeze({load, getMenus: () => [...state.menus]});
+  }
+
+  root.MenuUI = Object.freeze({ foodPhoto, createMenuRenderer, createMenuBrowser });
 })(globalThis);
