@@ -60,7 +60,8 @@ class QueueServicePersistenceTest {
     assertEquals(3,recorder.events.size());assertNotNull(queues.get(order.id(),null).statusChangedAt());
     assertEquals(HttpStatus.CONFLICT,assertThrows(ApiException.class,()->queues.advance(order.id())).getStatus());
     assertEquals(HttpStatus.CONFLICT,assertThrows(ApiException.class,()->queues.cancel(order.id(),null)).getStatus());
-    assertEquals(3,recorder.events.size());assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM notification_log",Integer.class));
+    assertEquals(3,recorder.events.size());assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM notification_log",Integer.class));
+    assertEquals("PREVIEW",jdbc.queryForObject("SELECT delivery_status FROM notification_log",String.class)); // T13 console observer is now active.
   }
   @Test void ownerCancellationPersistsAndWrongTokenLeavesRowUntouched(){
     var order=create();assertEquals(HttpStatus.FORBIDDEN,assertThrows(ApiException.class,()->queues.cancel(order.id(),"wrong")).getStatus());
