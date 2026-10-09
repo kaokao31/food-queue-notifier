@@ -42,7 +42,7 @@ class SecurityRoutesTest {
         });
   }
   @Test void publicReadRoutesStayAvailableAndKeepSecurityHeaders(){check((mvc,ctx)->{
-    for(String path:new String[]{"/","/queue/8","/staff/login","/assets/app.js","/sw.js","/api/v1/menu-items","/api/v1/menu-items/8/image","/api/v1/push/public-key","/actuator/health"})
+    for(String path:new String[]{"/","/queue/8","/staff/login","/assets/app.js","/sw.js","/api/v1/menu-items","/api/v1/menu-items/8/image","/api/v1/push/public-key","/api/v1/csrf","/actuator/health"})
       mvc.perform(get(path)).andExpect(status().isOk()).andExpect(header().string("X-Content-Type-Options","nosniff"));
     mvc.perform(get("/")).andExpect(header().string("Referrer-Policy","same-origin"));
   });}
@@ -60,16 +60,24 @@ class SecurityRoutesTest {
     mvc.perform(get("/api/v1/orders/8").header("X-Queue-Token","owner-fixture")).andExpect(status().isOk()).andExpect(content().string("PUBLIC"));
     mvc.perform(get("/api/v1/orders/8/notifications").header("X-Queue-Token","owner-fixture")).andExpect(status().isUnauthorized());
   });}
-  @Test void csrfStaysEnabledAndMutationsRemainStaffOnlyAtThisStep(){check((mvc,ctx)->{
-    for(String path:new String[]{"/api/v1/orders","/api/v1/menu-items","/api/v1/orders/8/subscription"}){
+  @Test void csrfProtectsCustomerMutationsAndStaffBoundariesRemain(){check((mvc,ctx)->{
+    for(String path:new String[]{"/api/v1/orders","/api/v1/orders/8/subscription"}){
       mvc.perform(post(path)).andExpect(status().isForbidden());
-      mvc.perform(post(path).with(csrf())).andExpect(status().isUnauthorized());
+      mvc.perform(post(path).with(csrf())).andExpect(status().isOk()).andExpect(content().string("PUBLIC"));
       mvc.perform(post(path).with(user("test-only").roles("STAFF"))).andExpect(status().isForbidden());
       mvc.perform(post(path).with(user("test-only").roles("STAFF")).with(csrf())).andExpect(status().isOk()).andExpect(content().string("STAFF"));
     }
+    mvc.perform(put("/api/v1/orders/8").with(csrf())).andExpect(status().isOk());
+    mvc.perform(delete("/api/v1/orders/8/subscription").with(csrf())).andExpect(status().isOk());
+    mvc.perform(patch("/api/v1/queues/8/cancel").with(csrf())).andExpect(status().isOk());
+    for(String method:new String[]{"POST","PUT","DELETE"}) {
+      mvc.perform(request(org.springframework.http.HttpMethod.valueOf(method),"/api/v1/menu-items/8").with(csrf())).andExpect(status().isUnauthorized());
+    }
     mvc.perform(delete("/api/v1/orders/8").with(user("test-only").roles("CUSTOMER")).with(csrf())).andExpect(status().isForbidden());
+    mvc.perform(delete("/api/v1/orders/8").with(csrf())).andExpect(status().isUnauthorized());
+    mvc.perform(patch("/api/v1/queues/8/advance").with(csrf())).andExpect(status().isUnauthorized());
     mvc.perform(patch("/api/v1/queues/8/advance").with(user("test-only").roles("STAFF")).with(csrf())).andExpect(status().isOk());
-    mvc.perform(post("/api/v1/orders").with(user("test-only").roles("STAFF")).with(csrf().useInvalidToken())).andExpect(status().isForbidden());
+    mvc.perform(post("/api/v1/orders").with(csrf().useInvalidToken())).andExpect(status().isForbidden());
   });}
   @Test void unknownRoutesAreDeniedEvenToStaff(){check((mvc,ctx)->{
     mvc.perform(get("/api/private/new-endpoint").with(user("test-only").roles("STAFF"))).andExpect(status().isForbidden());
