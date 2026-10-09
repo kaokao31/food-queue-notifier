@@ -1,5 +1,14 @@
 (function (root) {
  'use strict';
+ if(document.body.dataset.page==='queue'){
+  const { $, api, escapeHtml, money, labels }=root.CoreUI;
+  const id=location.pathname.split('/').filter(Boolean).at(-1);
+  const tracker=root.QueueUI.createTracker({id,getToken:()=>localStorage.getItem('queue-token-'+id),request:api,
+   onError:message=>{$('#queue-error').textContent=message;},
+   render:order=>root.QueueUI.renderOrder(order,{escapeHtml,money,labels,elements:{number:$('#queue-number'),status:$('#queue-status'),date:$('#queue-date'),help:$('#queue-help'),items:$('#order-items'),total:$('#order-total'),steps:document.querySelectorAll('[data-state]')}})
+  });
+  root.addEventListener('pagehide',()=>tracker.stop(),{once:true});void tracker.load();return;
+ }
  if (document.body.dataset.page !== 'menu') return;
  const { $, api, escapeHtml, money, toast, labels } = root.CoreUI;
  root.HistoryUI.createHistory({request:api, getStorage:()=>localStorage, escapeHtml, money, labels,
