@@ -1,5 +1,12 @@
 (function (root) {
  'use strict';
+ if(document.body.dataset.page==='staff'){
+  const {$,api,escapeHtml,money,labels}=root.CoreUI;
+  const staff=root.StaffQueueUI.createStaffQueue({request:api,escapeHtml,money,labels,
+   elements:{refresh:$('#refresh'),filters:$('#status-filters'),list:$('#staff-orders'),prev:$('#prev'),next:$('#next'),page:$('#page-info'),error:$('#staff-error'),dialog:$('#staff-detail-dialog'),detail:$('#staff-detail-content'),close:$('#close-staff-detail')}});
+  root.addEventListener('pagehide',()=>staff.stop(),{once:true});void staff.load();return;
+ }
+
  if(document.body.dataset.page==='queue'){
   const { $, api, escapeHtml, money, labels }=root.CoreUI;
   const id=location.pathname.split('/').filter(Boolean).at(-1);
