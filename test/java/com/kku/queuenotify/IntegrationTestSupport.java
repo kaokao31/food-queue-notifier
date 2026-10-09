@@ -12,7 +12,8 @@ import org.springframework.test.context.*;
 import org.springframework.test.web.servlet.MockMvc;
 /** Isolated PostgreSQL and test-only access/token/clock providers. No C/T implementation. */
 @SpringBootTest
-@AutoConfigureMockMvc
+// Existing A/T business fixtures do not establish security; real filters are exercised by SecurityRoutesTest.
+@AutoConfigureMockMvc(addFilters=false)
 @Import({OrderingTestDoubles.class,IntegrationTestSupport.TimeFixture.class})
 abstract class IntegrationTestSupport {
  static final PostgresTestDatabase DATABASE=start();
