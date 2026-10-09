@@ -1,5 +1,12 @@
 package com.kku.queuenotify.config;
 
+import java.nio.charset.StandardCharsets;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -21,8 +28,22 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 @ConditionalOnWebApplication(type=ConditionalOnWebApplication.Type.SERVLET)
 public class SecurityConfig {
-  /** Suppresses Boot's generated default user until configured BCrypt login arrives in C-R05. */
-  @Bean AuthenticationProvider unavailableStaffAuthentication() {
+  @Bean PasswordEncoder staffPasswordEncoder() {return new BCryptPasswordEncoder();}
+
+  /** Blank password leaves login unavailable; no default credential is created. */
+  @Bean AuthenticationProvider staffAuthentication(
+      @Value("${staff.username:staff}") String username,
+      @Value("${staff.password:}") String password, PasswordEncoder staffPasswordEncoder) {
+    if (!password.isEmpty()) {
+      if (username.isBlank() || username.length()>100 || password.length()<12
+          || password.getBytes(StandardCharsets.UTF_8).length>72)
+        throw new IllegalArgumentException("Staff configuration requires a username and a password of at least 12 characters and at most 72 UTF-8 bytes");
+      var users=new InMemoryUserDetailsManager(User.withUsername(username)
+          .password(staffPasswordEncoder.encode(password)).roles("STAFF").build());
+      var provider=new DaoAuthenticationProvider();
+      provider.setUserDetailsService(users);provider.setPasswordEncoder(staffPasswordEncoder);
+      return provider;
+    }
     return new AuthenticationProvider() {
       @Override public Authentication authenticate(Authentication authentication) {
         throw new BadCredentialsException("Staff authentication is not configured");
@@ -33,10 +54,10 @@ public class SecurityConfig {
     };
   }
 
-  @Bean SecurityFilterChain security(HttpSecurity http,AuthenticationProvider unavailableStaffAuthentication) throws Exception {
+  @Bean SecurityFilterChain security(HttpSecurity http,AuthenticationProvider staffAuthentication) throws Exception {
     var api=new AntPathRequestMatcher("/api/**");
     var login=new LoginUrlAuthenticationEntryPoint("/staff/login");
-    http.authenticationProvider(unavailableStaffAuthentication)
+    http.authenticationProvider(staffAuthentication)
         .authorizeHttpRequests(auth->auth
             .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
             .requestMatchers(HttpMethod.GET,"/","/queue/*","/staff/login","/assets/**","/sw.js",
@@ -48,7 +69,11 @@ public class SecurityConfig {
             // All mutations remain staff-only in this intermediate step, including customer mutations.
             .requestMatchers("/staff/**","/api/v1/menu-items/**","/api/v1/orders/**","/api/v1/queues/**").hasRole("STAFF")
             .anyRequest().denyAll())
-        .formLogin(form->form.disable()).httpBasic(basic->basic.disable()).logout(logout->logout.disable())
+        .formLogin(form->form.loginPage("/staff/login").loginProcessingUrl("/staff/login")
+            .defaultSuccessUrl("/staff",true).failureUrl("/staff/login?error").permitAll())
+        .httpBasic(basic->basic.disable())
+        .logout(logout->logout.logoutUrl("/staff/logout").logoutSuccessUrl("/staff/login?logout")
+            .invalidateHttpSession(true).clearAuthentication(true).deleteCookies("JSESSIONID"))
         // CSRF stays enabled by default. C-R06 adds the browser token API and customer mutation rules.
         .exceptionHandling(errors->errors
             .authenticationEntryPoint((request,response,error)->{
