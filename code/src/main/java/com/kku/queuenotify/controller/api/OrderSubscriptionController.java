@@ -18,6 +18,13 @@ public class OrderSubscriptionController {
     this.subscriptions = subscriptions;
   }
 
+  @DeleteMapping
+  public ResponseEntity<Void> detach(@PathVariable @Positive Long id,
+      @RequestHeader(value = "X-Queue-Token", required = false) String token) {
+    subscriptions.detach(id, token);
+    return ResponseEntity.noContent().build();
+  }
+
   @PostMapping
   public ResponseEntity<Void> attach(@PathVariable @Positive Long id,
       @RequestHeader(value = "X-Queue-Token", required = false) String token,
