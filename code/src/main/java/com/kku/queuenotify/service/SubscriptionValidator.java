@@ -3,6 +3,7 @@ package com.kku.queuenotify.service;
 import com.kku.queuenotify.dto.request.PushSubscriptionRequest;
 import com.kku.queuenotify.exception.ApiException;
 import java.util.Base64;
+import java.net.URI;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.math.ec.ECPoint;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,40 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SubscriptionValidator {
+  /** Complete validation used before storing or sending a subscription. */
+  public void validate(PushSubscriptionRequest request) {
+    if (request == null) {
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Subscription is required");
+    }
+    validateEndpoint(request.endpoint());
+    validateKeys(request);
+  }
+
+  /** This project supports Android Chrome / FCM endpoints only. No network lookup is performed. */
+  public void validateEndpoint(String endpoint) {
+    try {
+      if (endpoint == null || endpoint.isBlank() || endpoint.length() > 2048) {
+        throw new IllegalArgumentException();
+      }
+      URI uri = URI.create(endpoint);
+      if (!"https".equalsIgnoreCase(uri.getScheme())
+          || !"fcm.googleapis.com".equalsIgnoreCase(uri.getHost())
+          || uri.getRawUserInfo() != null
+          || (uri.getPort() != -1 && uri.getPort() != 443)
+          || uri.getRawQuery() != null
+          || uri.getRawFragment() != null
+          || uri.getRawPath() == null
+          || !uri.getRawPath().matches("/(?:fcm/send|wp)/[A-Za-z0-9_:-]+")) {
+        throw new IllegalArgumentException();
+      }
+    } catch (IllegalArgumentException ex) {
+      // Endpoint URLs can contain subscription credentials; do not echo them.
+      throw new ApiException(HttpStatus.BAD_REQUEST,
+          "Subscription endpoint is invalid; supported provider: Android Chrome/FCM");
+    }
+  }
+
+
   /** Validate browser encryption keys only; endpoint authorization is a separate step. */
   public void validateKeys(PushSubscriptionRequest request) {
     try {
