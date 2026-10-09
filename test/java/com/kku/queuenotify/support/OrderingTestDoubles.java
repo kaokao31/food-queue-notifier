@@ -9,11 +9,12 @@ import java.util.HexFormat;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 /** Test-only providers isolate A ordering persistence before C implements real security. */
 @TestConfiguration(proxyBeanMethods=false)
 public class OrderingTestDoubles {
- @Bean public Tokens fixtureTokens(){return new Tokens();}
+ @Bean @Primary public Tokens fixtureTokens(){return new Tokens();}
  @Bean public Access fixtureAccess(QueueRepository queues,Tokens tokens){return new Access(queues,tokens);}
  public static class Tokens implements QueueTokenGenerator {
   private final AtomicLong sequence=new AtomicLong();public boolean failHash;
