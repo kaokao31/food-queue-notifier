@@ -48,7 +48,7 @@ class SecurityRoutesTest {
   });}
   @Test void protectedApiReturns401AndUiRedirectsForAnonymous(){check((mvc,ctx)->{
     for(String path:new String[]{"/api/v1/orders","/api/v1/orders/8/notifications"})mvc.perform(get(path)).andExpect(status().isUnauthorized())
-        .andExpect(header().string("Cache-Control","no-store")).andExpect(jsonPath("$.status").value(401));
+        .andExpect(header().string("Cache-Control","no-store")).andExpect(jsonPath("$.status").value(401)).andExpect(jsonPath("$.error").value("Unauthorized")).andExpect(jsonPath("$.message").value("Staff login is required"));
     mvc.perform(get("/staff")).andExpect(status().isFound()).andExpect(redirectedUrl("http://localhost/staff/login"));
   });}
   @Test void authenticatedNonStaffIsForbiddenAndStaffRoleReachesC03Check(){check((mvc,ctx)->{
@@ -62,7 +62,7 @@ class SecurityRoutesTest {
   });}
   @Test void csrfProtectsCustomerMutationsAndStaffBoundariesRemain(){check((mvc,ctx)->{
     for(String path:new String[]{"/api/v1/orders","/api/v1/orders/8/subscription"}){
-      mvc.perform(post(path)).andExpect(status().isForbidden());
+      mvc.perform(post(path)).andExpect(status().isForbidden()).andExpect(header().string("Cache-Control","no-store")).andExpect(jsonPath("$.status").value(403)).andExpect(jsonPath("$.error").value("Forbidden"));
       mvc.perform(post(path).with(csrf())).andExpect(status().isOk()).andExpect(content().string("PUBLIC"));
       mvc.perform(post(path).with(user("test-only").roles("STAFF"))).andExpect(status().isForbidden());
       mvc.perform(post(path).with(user("test-only").roles("STAFF")).with(csrf())).andExpect(status().isOk()).andExpect(content().string("STAFF"));

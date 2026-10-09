@@ -100,6 +100,7 @@ public class SecurityConfig {
   private static void json(HttpServletResponse response,int status,String message) throws java.io.IOException {
     response.setStatus(status);response.setHeader("Cache-Control","no-store");
     response.setContentType("application/json;charset=UTF-8");
-    response.getWriter().write("{\"status\":"+status+",\"message\":\""+message+"\"}");
+    new com.fasterxml.jackson.databind.ObjectMapper().writeValue(response.getWriter(),
+        com.kku.queuenotify.exception.GlobalExceptionHandler.body(org.springframework.http.HttpStatus.valueOf(status),message));
   }
 }

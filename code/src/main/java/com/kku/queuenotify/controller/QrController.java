@@ -1,4 +1,5 @@
 package com.kku.queuenotify.controller;
+import com.kku.queuenotify.exception.GlobalExceptionHandler;
 import com.kku.queuenotify.service.QrService;
 import com.kku.queuenotify.service.OrderAccessService;
 import com.kku.queuenotify.exception.ApiException;
@@ -15,5 +16,5 @@ public class QrController {
  @GetMapping("/staff/qr") public String page(){requireStaff();return "qr";}
  @GetMapping(value="/staff/qr.png",produces=MediaType.IMAGE_PNG_VALUE)
  @ResponseBody public ResponseEntity<byte[]> image(@RequestParam String url) throws Exception {requireStaff();return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(qr.generateMenuQr(url));}
- @ExceptionHandler(ApiException.class) public ResponseEntity<Map<String,String>> error(ApiException error){return ResponseEntity.status(error.getStatus()).body(Map.of("message",error.getMessage()));}
+ @ExceptionHandler(ApiException.class) public ResponseEntity<Map<String,Object>> error(ApiException error){return GlobalExceptionHandler.response(error.getStatus(),error.getMessage());}
 }

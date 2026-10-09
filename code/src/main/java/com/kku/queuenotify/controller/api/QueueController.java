@@ -1,5 +1,6 @@
 package com.kku.queuenotify.controller.api;
 
+import com.kku.queuenotify.exception.GlobalExceptionHandler;
 import com.kku.queuenotify.dto.response.QueueResponse;
 import com.kku.queuenotify.exception.ApiException;
 import com.kku.queuenotify.service.QueueService;
@@ -31,8 +32,7 @@ public class QueueController {
     return ResponseEntity.ok().header("Cache-Control","no-store").body(queue);
   }
   @ExceptionHandler(ApiException.class)
-  public ResponseEntity<Map<String,String>> error(ApiException error){
-    return ResponseEntity.status(error.getStatus()).header("Cache-Control","no-store")
-        .body(Map.of("message",error.getMessage()));
+  public ResponseEntity<Map<String,Object>> error(ApiException error){
+    return GlobalExceptionHandler.response(error.getStatus(),error.getMessage());
   }
 }

@@ -1,5 +1,6 @@
 package com.kku.queuenotify.controller.api;
 
+import com.kku.queuenotify.exception.GlobalExceptionHandler;
 import com.kku.queuenotify.dto.request.MenuItemRequest;
 import com.kku.queuenotify.dto.response.MenuItemResponse;
 import com.kku.queuenotify.service.MenuImageService;
@@ -64,7 +65,7 @@ public class MenuImageController {
     if(!service.isStaff())throw new ApiException(HttpStatus.FORBIDDEN,"สำหรับพนักงานเท่านั้น");
   }
   @ExceptionHandler(ApiException.class)
-  public ResponseEntity<Map<String,String>> domainError(ApiException error) {
-    return ResponseEntity.status(error.getStatus()).body(Map.of("message",error.getMessage()));
+  public ResponseEntity<Map<String,Object>> domainError(ApiException error) {
+    return GlobalExceptionHandler.response(error.getStatus(),error.getMessage());
   }
 }

@@ -2,7 +2,7 @@ package com.kku.queuenotify.service.impl;
 
 import com.kku.queuenotify.domain.entity.Queue;
 import com.kku.queuenotify.domain.enums.QueueStatus;
-import com.kku.queuenotify.exception.ApiException;
+import com.kku.queuenotify.exception.IllegalStateTransitionException;
 import com.kku.queuenotify.service.QueueStateHandler;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -10,7 +10,6 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -45,5 +44,5 @@ public final class QueueContext implements QueueStateHandler.Context {
       throw new IllegalTransactionStateException("Queue mutation requires a synchronized writable transaction");
     if(queue.getId()==null || queue.getId()<=0 || getStatus()==null || state.getStatus()!=getStatus())throw conflict();
   }
-  private ApiException conflict(){return new ApiException(HttpStatus.CONFLICT,"Queue state does not match this operation");}
+  private IllegalStateTransitionException conflict(){return new IllegalStateTransitionException("Queue state does not match this operation");}
 }
