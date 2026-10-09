@@ -12,6 +12,7 @@ public class QueueMapper {
     return new QueueResponse(
         queue.getId(),
         queue.getQueueNumber(),
+        queue.getQueueDate(),
         queue.getStatus(),
         queue.getStatusChangedAt());
   }

@@ -52,7 +52,7 @@ class RepositoryPersistenceTest {
     var order = new Order(); order.setTotalAmount(new BigDecimal("25.00"));
     order.getOrderItems().add(OrderItem.builder().order(order).menuItem(available).quantity(1)
         .unitPrice(new BigDecimal("25.00")).subtotal(new BigDecimal("25.00")).menuItemName("Available").build());
-    order.setQueue(Queue.builder().order(order).queueNumber(1).status(QueueStatus.WAITING).tokenHash("1".repeat(64)).build());
+    order.setQueue(Queue.builder().order(order).queueNumber(1).queueDate(java.time.LocalDate.of(2026,10,9)).status(QueueStatus.WAITING).tokenHash("1".repeat(64)).build());
     orders.saveAndFlush(order);
     assertEquals(1, orders.list(QueueStatus.WAITING, page).getTotalElements());
     assertEquals(0, orders.list(QueueStatus.READY, page).getTotalElements());

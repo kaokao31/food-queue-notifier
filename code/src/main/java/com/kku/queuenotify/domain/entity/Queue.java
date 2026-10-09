@@ -2,13 +2,19 @@ package com.kku.queuenotify.domain.entity;
 
 import com.kku.queuenotify.domain.enums.QueueStatus;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
 
 @Entity
-@Table(name = "queue", uniqueConstraints = @UniqueConstraint(name = "uq_queue_number", columnNames = "queue_number"))
+@Table(
+    name = "queue",
+    uniqueConstraints =
+        @UniqueConstraint(
+            name = "uq_queue_date_number",
+            columnNames = {"queue_date", "queue_number"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,6 +34,9 @@ public class Queue {
 
   @Column(name = "queue_number", nullable = false)
   private Integer queueNumber;
+
+  @Column(name = "queue_date", nullable = false)
+  private LocalDate queueDate;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
