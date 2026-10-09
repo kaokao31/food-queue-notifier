@@ -62,11 +62,16 @@ public class SecurityConfig {
             .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
             .requestMatchers(HttpMethod.GET,"/","/queue/*","/staff/login","/assets/**","/sw.js",
                 "/api/v1/menu-items","/api/v1/menu-items/*","/api/v1/menu-items/*/image",
-                "/api/v1/push/public-key","/actuator/health","/error").permitAll()
+                "/api/v1/push/public-key","/api/v1/csrf","/actuator/health","/error").permitAll()
             .requestMatchers(HttpMethod.GET,"/api/v1/orders","/api/v1/orders/*/notifications").hasRole("STAFF")
             // The services still check each order's owner token; public routing grants no data access.
             .requestMatchers(HttpMethod.GET,"/api/v1/orders/*","/api/v1/queues/*").permitAll()
-            // All mutations remain staff-only in this intermediate step, including customer mutations.
+            // CSRF is mandatory; existing services separately validate each order owner token.
+            .requestMatchers(HttpMethod.POST,"/api/v1/orders","/api/v1/orders/*/subscription").permitAll()
+            .requestMatchers(HttpMethod.PUT,"/api/v1/orders/*").permitAll()
+            .requestMatchers(HttpMethod.DELETE,"/api/v1/orders/*/subscription").permitAll()
+            .requestMatchers(HttpMethod.PATCH,"/api/v1/queues/*/cancel").permitAll()
+            // Menu mutations, order deletion and queue advancement require STAFF.
             .requestMatchers("/staff/**","/api/v1/menu-items/**","/api/v1/orders/**","/api/v1/queues/**").hasRole("STAFF")
             .anyRequest().denyAll())
         .formLogin(form->form.loginPage("/staff/login").loginProcessingUrl("/staff/login")
@@ -74,7 +79,7 @@ public class SecurityConfig {
         .httpBasic(basic->basic.disable())
         .logout(logout->logout.logoutUrl("/staff/logout").logoutSuccessUrl("/staff/login?logout")
             .invalidateHttpSession(true).clearAuthentication(true).deleteCookies("JSESSIONID"))
-        // CSRF stays enabled by default. C-R06 adds the browser token API and customer mutation rules.
+        // CSRF stays enabled for every mutation, including public customer routes.
         .exceptionHandling(errors->errors
             .authenticationEntryPoint((request,response,error)->{
               if(api.matches(request)) json(response,401,"Staff login is required");
