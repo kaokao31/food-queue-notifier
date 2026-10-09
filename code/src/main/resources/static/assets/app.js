@@ -9,9 +9,11 @@
 
  if(document.body.dataset.page==='staff'){
   const {$,api,escapeHtml,money,labels}=root.CoreUI;
+  const logs=root.NotificationLogUI.createViewer({request:api,escapeHtml,
+   elements:{form:$('#notification-log-form'),id:$('#notification-order-id'),open:$('#open-notification-log'),error:$('#notification-log-error'),dialog:$('#notification-log-dialog'),title:$('#notification-log-title'),content:$('#notification-log-content'),close:$('#close-notification-log')}});
   const staff=root.StaffQueueUI.createStaffQueue({request:api,escapeHtml,money,labels,
    elements:{refresh:$('#refresh'),filters:$('#status-filters'),list:$('#staff-orders'),prev:$('#prev'),next:$('#next'),page:$('#page-info'),error:$('#staff-error'),dialog:$('#staff-detail-dialog'),detail:$('#staff-detail-content'),close:$('#close-staff-detail')}});
-  root.addEventListener('pagehide',()=>staff.stop(),{once:true});void staff.load();return;
+  root.addEventListener('pagehide',()=>{staff.stop();logs.stop();},{once:true});void staff.load();return;
  }
 
  if(document.body.dataset.page==='queue'){
