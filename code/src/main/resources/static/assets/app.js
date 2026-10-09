@@ -17,6 +17,8 @@
  if(document.body.dataset.page==='queue'){
   const { $, api, escapeHtml, money, labels }=root.CoreUI;
   const id=location.pathname.split('/').filter(Boolean).at(-1);
+  const push=root.PushClient.createClient({id,getToken:()=>localStorage.getItem('queue-token-'+id),request:api,
+   elements:{enable:$('#enable-push'),disable:$('#disable-push'),message:$('#push-message')}});
   let tracker;
   const actions=root.QueueUI.createActions({id,getToken:()=>localStorage.getItem('queue-token-'+id),request:api,escapeHtml,money,confirmCancel:message=>root.confirm(message),
    onBusy:busy=>{if(busy)tracker?.stop();else startTracking();},
@@ -25,11 +27,11 @@
   function startTracking(){
    tracker?.stop();
    tracker=root.QueueUI.createTracker({id,getToken:()=>localStorage.getItem('queue-token-'+id),request:api,
-    onError:message=>{$('#queue-error').textContent=message;},onOrder:order=>actions.update(order),
+    onError:message=>{$('#queue-error').textContent=message;},onOrder:order=>{actions.update(order);push.update(order);},
     render:order=>root.QueueUI.renderOrder(order,{escapeHtml,money,labels,elements:{number:$('#queue-number'),status:$('#queue-status'),date:$('#queue-date'),help:$('#queue-help'),items:$('#order-items'),total:$('#order-total'),steps:document.querySelectorAll('[data-state]')}})
    });void tracker.load();
   }
-  root.addEventListener('pagehide',()=>tracker?.stop(),{once:true});startTracking();return;
+  root.addEventListener('pagehide',()=>{tracker?.stop();push.stop();},{once:true});startTracking();return;
  }
  if (document.body.dataset.page !== 'menu') return;
  const { $, api, escapeHtml, money, toast, labels } = root.CoreUI;
