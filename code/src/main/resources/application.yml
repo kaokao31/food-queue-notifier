@@ -28,3 +28,12 @@ management:
   endpoint:
     health:
       show-details: never
+
+# Console mode is for local preview, not confirmation of browser delivery.
+notification:
+  mode: ${NOTIFICATION_MODE:console}
+
+webpush:
+  public-key: ${VAPID_PUBLIC_KEY:}
+  private-key: ${VAPID_PRIVATE_KEY:}
+  subject: ${VAPID_SUBJECT:}
