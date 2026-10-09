@@ -1,4 +1,5 @@
 package com.kku.queuenotify.controller.api;
+import com.kku.queuenotify.exception.GlobalExceptionHandler;
 import com.kku.queuenotify.dto.response.NotificationLogResponse;
 import com.kku.queuenotify.exception.ApiException;
 import com.kku.queuenotify.service.NotificationLogService;
@@ -16,10 +17,9 @@ public class NotificationLogController {
   @GetMapping public ResponseEntity<List<NotificationLogResponse>> list(@PathVariable Long id) {
     return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(logs.forStaff(id));
   }
-  // Controller-specific until C's shared error handling is integrated.
+  // Preserve domain status and message using the shared error contract.
   @ExceptionHandler(ApiException.class)
   public ResponseEntity<Map<String,Object>> error(ApiException error) {
-    return ResponseEntity.status(error.getStatus()).cacheControl(CacheControl.noStore())
-        .body(Map.of("status",error.getStatus().value(),"message",error.getMessage()));
+    return GlobalExceptionHandler.response(error.getStatus(),error.getMessage());
   }
 }

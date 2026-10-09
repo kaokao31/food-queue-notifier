@@ -1,5 +1,6 @@
 package com.kku.queuenotify.controller.api;
 
+import com.kku.queuenotify.exception.GlobalExceptionHandler;
 import com.kku.queuenotify.dto.request.PushSubscriptionRequest;
 import com.kku.queuenotify.exception.*;
 import com.kku.queuenotify.service.PushSubscriptionService;
@@ -26,10 +27,10 @@ public class PushSubscriptionController {
     return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("providerStatus",status,
         "message","Push provider accepted the request; device display is unconfirmed"));
   }
-  @ExceptionHandler(PushDemoException.class) public ResponseEntity<Map<String,String>> demoError(PushDemoException error){
-    return ResponseEntity.status(error.getStatus()).cacheControl(CacheControl.noStore()).body(Map.of("message",error.getMessage()));
+  @ExceptionHandler(PushDemoException.class) public ResponseEntity<Map<String,Object>> demoError(PushDemoException error){
+    return GlobalExceptionHandler.response(error.getStatus(),error.getMessage());
   }
-  @ExceptionHandler(ApiException.class) public ResponseEntity<Map<String,String>> validationError(ApiException error){
-    return ResponseEntity.status(error.getStatus()).cacheControl(CacheControl.noStore()).body(Map.of("message",error.getMessage()));
+  @ExceptionHandler(ApiException.class) public ResponseEntity<Map<String,Object>> validationError(ApiException error){
+    return GlobalExceptionHandler.response(error.getStatus(),error.getMessage());
   }
 }

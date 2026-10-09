@@ -1,5 +1,6 @@
 package com.kku.queuenotify.controller.api;
 
+import com.kku.queuenotify.exception.GlobalExceptionHandler;
 import com.kku.queuenotify.common.PageRequests;
 import com.kku.queuenotify.dto.request.MenuItemRequest;
 import com.kku.queuenotify.dto.response.*;
@@ -72,7 +73,7 @@ public class MenuController {
   }
 
   @ExceptionHandler(ApiException.class)
-  public ResponseEntity<Map<String,String>> domainError(ApiException error) {
-    return ResponseEntity.status(error.getStatus()).body(Map.of("message",error.getMessage()));
+  public ResponseEntity<Map<String,Object>> domainError(ApiException error) {
+    return GlobalExceptionHandler.response(error.getStatus(),error.getMessage());
   }
 }

@@ -4,11 +4,9 @@ import com.kku.queuenotify.controller.api.PushController;
 import com.kku.queuenotify.controller.api.OrderSubscriptionController;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import java.time.Instant;
 import java.util.Map;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,8 +27,6 @@ public class PushConfigurationExceptionHandler {
 
   @ExceptionHandler(PushDemoException.class)
   public ResponseEntity<Map<String, Object>> handle(PushDemoException ex) {
-    return ResponseEntity.status(ex.getStatus()).cacheControl(CacheControl.noStore())
-        .body(Map.of("timestamp", Instant.now().toString(), "status", ex.getStatus().value(),
-            "error", ex.getStatus().getReasonPhrase(), "message", ex.getMessage()));
+    return GlobalExceptionHandler.response(ex.getStatus(),ex.getMessage());
   }
 }

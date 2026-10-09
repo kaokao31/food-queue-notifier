@@ -1,5 +1,6 @@
 package com.kku.queuenotify.controller.api;
 
+import com.kku.queuenotify.exception.GlobalExceptionHandler;
 import com.kku.queuenotify.common.PageRequests;
 import com.kku.queuenotify.domain.enums.QueueStatus;
 import com.kku.queuenotify.dto.request.*;
@@ -60,5 +61,5 @@ public class OrderController {
   }
 
   @ExceptionHandler(ApiException.class)
-  public ResponseEntity<Map<String,String>> error(ApiException error) {return ResponseEntity.status(error.getStatus()).body(Map.of("message",error.getMessage()));}
+  public ResponseEntity<Map<String,Object>> error(ApiException error) {return GlobalExceptionHandler.response(error.getStatus(),error.getMessage());}
 }
