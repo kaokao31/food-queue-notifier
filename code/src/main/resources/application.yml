@@ -37,3 +37,8 @@ webpush:
   public-key: ${VAPID_PUBLIC_KEY:}
   private-key: ${VAPID_PRIVATE_KEY:}
   subject: ${VAPID_SUBJECT:}
+
+# Blank password keeps staff authentication unavailable. Configure through environment.
+staff:
+  username: ${STAFF_USERNAME:staff}
+  password: ${STAFF_PASSWORD:}
