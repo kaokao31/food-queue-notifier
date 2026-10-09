@@ -18,14 +18,17 @@ public class MenuServiceImpl implements MenuService {
   private final MenuItemRepository menus;
   private final OrderItemRepository lines;
   private final MenuItemMapper mapper;
+  private final MenuImageRepository images;
 
   public MenuServiceImpl(
       MenuItemRepository menus,
       OrderItemRepository lines,
-      MenuItemMapper mapper) {
+      MenuItemMapper mapper,
+      MenuImageRepository images) {
     this.menus = menus;
     this.lines = lines;
     this.mapper = mapper;
+    this.images = images;
   }
 
   @Transactional(readOnly = true)
@@ -62,6 +65,8 @@ public class MenuServiceImpl implements MenuService {
     var m = menus.lockById(id).orElseThrow(() -> missing());
     if (lines.existsByMenuItemId(id))
       throw new ApiException(HttpStatus.CONFLICT, "เมนูมีประวัติออเดอร์แล้ว ให้ปิดขายแทนการลบ");
+    images.findById(id).ifPresent(images::delete);
+    images.flush();
     menus.delete(m);
   }
 

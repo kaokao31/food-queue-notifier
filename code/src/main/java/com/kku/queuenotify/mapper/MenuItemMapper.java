@@ -14,6 +14,8 @@ public class MenuItemMapper {
         m.getPrice(),
         m.getPrepTimeMinutes(),
         m.isAvailable(),
-        null);
+        m.getImageKey() == null
+            ? null
+            : "/api/v1/menu-items/" + m.getId() + "/image?v=" + m.getImageKey());
   }
 }
