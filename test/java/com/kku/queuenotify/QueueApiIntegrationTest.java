@@ -73,7 +73,8 @@ class QueueApiIntegrationTest {
     for(var action:List.of("advance","cancel"))mvc.perform(patch("/api/v1/queues/"+order.id()+"/"+action)
         .session(session).header(token.header(),token.value())).andExpect(status().isConflict());
     assertEquals("COMPLETED",jdbc.queryForObject("SELECT status FROM queue WHERE id=?",String.class,order.id()));
-    assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM notification_log",Integer.class));
+    assertEquals(1,jdbc.queryForObject("SELECT count(*) FROM notification_log",Integer.class));
+    assertEquals("PREVIEW",jdbc.queryForObject("SELECT delivery_status FROM notification_log",String.class)); // T13 console observer is now active.
   }
   @Test void customerCancelRequiresCsrfAndOwnerTokenAndCommitsCancellation() throws Exception {
     var order=create();var token=csrf(null);
