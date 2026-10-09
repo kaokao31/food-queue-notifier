@@ -1,5 +1,12 @@
 (function (root) {
  'use strict';
+ if(document.body.dataset.page==='staff-menu'){
+  const {$,api,toast}=root.CoreUI;
+  const editor=root.StaffMenuUI.createEditor({request:api,notify:toast,renderer:root.MenuUI.createMenuRenderer(root.CoreUI),photo:root.MenuUI.foodPhoto,
+   elements:{form:$('#menu-form'),dialog:$('#menu-dialog'),file:$('#menu-image'),preview:$('#menu-image-preview'),newMenu:$('#new-menu'),deleteMenu:$('#delete-menu'),title:$('#form-title'),formError:$('#form-error'),error:$('#menu-error'),grid:$('#admin-menu'),prev:$('#prev'),next:$('#next'),page:$('#page-info'),close:$('#close-menu-dialog')}});
+  root.addEventListener('pagehide',()=>editor.stop(),{once:true});void editor.load();return;
+ }
+
  if(document.body.dataset.page==='staff'){
   const {$,api,escapeHtml,money,labels}=root.CoreUI;
   const staff=root.StaffQueueUI.createStaffQueue({request:api,escapeHtml,money,labels,
