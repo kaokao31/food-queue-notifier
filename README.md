@@ -5,7 +5,7 @@
 
 ## สถานะปัจจุบัน
 
-มีหน้าเมนู ตะกร้า ประวัติและติดตามคิว หน้าจอพนักงาน และ QR พร้อมฐานข้อมูล เมนู/ภาพเมนู ออเดอร์และเลขคิวรายวัน การเรียก API ที่ต้องใช้ token หรือสิทธิ์พนักงานจะตอบ 503 เมื่อยังไม่มี implementation ที่เกี่ยวข้อง ระบบยังรอส่วน State/security ของคมชาญ และ Subscription/Push/Log ของธีธัช จึงยังไม่ใช่ release ที่ผ่านการรับรองครบระบบ
+มีหน้าเมนู ตะกร้า ประวัติ/ติดตามคิว หน้าจอพนักงานและ QR พร้อม persistence เมนู/ภาพเมนู ออเดอร์และเลขคิวรายวัน รวม C1–C11 สำหรับ token, owner/STAFF access, BCrypt login, CSRF, State และ Queue API แล้ว รวม T1–T15 สำหรับ subscription, Browser Push, AFTER_COMMIT observer, single-attempt delivery, STAFF log และ standalone demo แล้ว เอกสาร T16 อ้างอิง baseline `76a788a`; ผล Java full suite ล่าสุดผ่าน 247 tests บนเครื่องธีธัช ยังเหลือคมชาญ C12–C16 การตรวจอุปกรณ์จริงและ acceptance/deployment ของทีม จึงยังไม่ใช่ release ที่ผ่านการรับรองครบระบบ
 
 ## โครงสร้าง
 
@@ -36,7 +36,7 @@ docker compose up --build -d
 docker compose logs app
 ```
 
-Compose เปิด port เฉพาะ localhost และเก็บข้อมูลใน named volume `queue_restart_data` คำสั่ง `docker compose down` หยุด container โดยเก็บ volume ไว้ Docker image build ข้าม tests; ให้รันชุดทดสอบแยกก่อนส่งมอบ ไม่เปิดระบบต่อสาธารณะจนรวม security และตรวจ acceptance ครบ
+Compose เปิด port เฉพาะ localhost และเก็บข้อมูลใน named volume `queue_restart_data` คำสั่ง `docker compose down` หยุด container โดยเก็บ volume ไว้ Docker image build ข้าม tests; ให้รันชุดทดสอบแยกก่อนส่งมอบ ตรวจการส่ง STAFF/VAPID/profile environment ให้ container และ acceptance ก่อนเผยแพร่; Compose ปัจจุบันยังไม่ได้ส่งค่าเหล่านี้ให้ app
 
 ## ทดสอบ
 
@@ -47,7 +47,7 @@ mvn clean verify
 
 PostgreSQL tests ใช้ embedded database แยกจากฐานข้อมูลแอป ไม่ต้องรัน Compose เพื่อทดสอบ CI ตรวจทั้ง JS และ Maven และเก็บ Surefire reports; ไม่มีการ deploy อัตโนมัติ
 
-ผลตรวจที่ผ่านมาอยู่ใน [test report](doc/test-report.md) การทดสอบที่ใช้ access/token fixtures ยืนยันส่วนเมนูและออเดอร์ ไม่ใช่หลักฐานว่า production security หรือ Push ทำงานแล้ว
+ผลตรวจเดิมอยู่ใน [test report](doc/test-report.md) และผลรวม Push/owner/security ใหม่อยู่ใน [Push test report](doc/push-test-report.md) Module tests ที่ใช้ access/token fixtures ยังยืนยันเฉพาะส่วนธุรกิจ ส่วน full API tests ใหม่ใช้ security/CSRF/owner implementation จริงกับ PostgreSQL และจำลองเฉพาะ provider; ไม่มีหลักฐานว่าอุปกรณ์แสดง Push จริงจากผลอัตโนมัติ
 
 ## เจ้าของงาน
 
@@ -66,3 +66,10 @@ PostgreSQL tests ใช้ embedded database แยกจากฐานข้�
 - รวมงานผ่าน Pull Request และมีสมาชิกอีกคนรีวิว
 
 ดู [handover](doc/handover.md), [acceptance](doc/acceptance.md), [ER](doc/diagrams/er.md) และ [migration](doc/migration.md) สไลด์จะจัดทำกับทีมภายหลัง
+
+## ตั้งค่าแจ้งเตือนและพนักงาน
+
+ดู [Push delivery/handover](doc/push-delivery.md), [sequence READY](doc/diagrams/sequence-ready.md) และ [sequence subscribe](doc/diagrams/sequence-subscribe.md)
+`NOTIFICATION_MODE=console` เป็น preview และค่า `webpush` ใช้ VAPID settings จาก environment รหัสผ่าน STAFF ว่างทำให้ล็อกอินไม่ได้ ไม่มี default credential ที่ใช้งานได้
+Demo เปิดเฉพาะ profile `push-demo` และ STAFF ที่ `/push-demo.html`; ต้องใช้ CSRF และเป็น provider test แยกจากข้อมูลออเดอร์/production log
+PREVIEW ไม่ส่ง provider ส่วน ACCEPTED หมายถึง provider รับคำขอเท่านั้น ไม่ยืนยัน device display
