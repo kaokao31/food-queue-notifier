@@ -30,6 +30,9 @@ public class MenuItem {
   @Column(nullable = false, precision = 10, scale = 2)
   private BigDecimal price;
 
+  @Column(name = "image_key", length = 64)
+  private String imageKey;
+
   @Column(name = "prep_time_minutes")
   private Integer prepTimeMinutes;
 }

@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 
 class EntityMappingTest {
   @Test
-  void validatesV2MappingsAndPersistsSharedQueueIdAndItemSnapshots() throws Exception {
+  void validatesV4MappingsAndPersistsSharedQueueIdAndItemSnapshots() throws Exception {
     try (var db = PostgresTestDatabase.start()) {
       Flyway.configure().dataSource(db.url(), db.username(), db.password())
-          .locations("classpath:db/migration").target("2")
+          .locations("classpath:db/migration").target("4")
           .baselineOnMigrate(false).cleanDisabled(true).load().migrate();
       var configuration = new Configuration()
           .setProperty("hibernate.connection.driver_class", "org.postgresql.Driver")
@@ -25,7 +25,7 @@ class EntityMappingTest {
           .setProperty("hibernate.hbm2ddl.auto", "validate")
           .setProperty("hibernate.jdbc.time_zone", "UTC");
       for (Class<?> entity : new Class<?>[]{Customer.class, NotificationPreference.class,
-          MenuItem.class, Order.class, OrderItem.class, Queue.class,
+          MenuItem.class, MenuImage.class, Order.class, OrderItem.class, Queue.class,
           PushSubscription.class, NotificationLog.class}) {
         configuration.addAnnotatedClass(entity);
       }

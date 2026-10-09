@@ -16,6 +16,8 @@ class MenuMappingTest {
     assertEquals(menu.getCategory(),response.category());assertEquals(menu.getPrice(),response.price());
     assertEquals(menu.getPrepTimeMinutes(),response.prepTimeMinutes());assertFalse(response.isAvailable());
     assertNull(response.imageUrl());
+    menu.setImageKey("a".repeat(64));
+    assertEquals("/api/v1/menu-items/8/image?v="+"a".repeat(64),new MenuItemMapper().response(menu).imageUrl());
     var json=new ObjectMapper().valueToTree(response);
     assertEquals(7,json.size());assertFalse(json.has("data"));assertFalse(json.has("imageKey"));
   }
