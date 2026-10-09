@@ -7,6 +7,7 @@ import com.kku.queuenotify.domain.enums.QueueStatus;
 import com.kku.queuenotify.repository.*;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,6 +39,8 @@ class RepositoryPersistenceTest {
   @Autowired PushSubscriptionRepository subscriptions;
   @Autowired NotificationLogRepository logs;
   @Autowired CustomerRepository customers;
+
+  @BeforeEach void isolateCatalogFixtures(){menus.deleteAllInBatch();}
 
   @Test void filtersAvailableMenusAndFindsOrdersByStatusAndMenuHistory() {
     var available = menus.saveAndFlush(MenuItem.builder().name("Available").price(new BigDecimal("25.00")).build());

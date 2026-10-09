@@ -23,6 +23,7 @@ class MenuCrudPersistenceTest {
  @AfterAll static void close() throws Exception {DATABASE.close();}
  @Autowired MenuService service;@Autowired MenuItemRepository menus;@Autowired OrderItemRepository lines;@Autowired OrderRepository orders;
  MenuItemRequest request(String name,boolean available){return new MenuItemRequest(name,"FOOD",new BigDecimal("25.00"),10,available);}
+ @BeforeEach void isolateCatalogFixtures(){menus.deleteAllInBatch();}
  @Test void createsUpdatesFiltersAndDeletesUnusedMenu(){
   var menu=service.create(request(" Rice ",true));assertEquals("Rice",menu.name());
   service.update(menu.id(),request("Changed",false));assertEquals(0,service.list(PageRequest.of(0,20),false).totalElements());assertEquals(1,service.list(PageRequest.of(0,20),true).totalElements());
