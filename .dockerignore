@@ -1,0 +1,13 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+target
+test
+doc
+img
+*.diff
+*.patch
+*.bundle
+*.zip
