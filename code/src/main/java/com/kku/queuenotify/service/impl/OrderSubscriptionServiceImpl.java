@@ -42,6 +42,17 @@ public class OrderSubscriptionServiceImpl implements OrderSubscriptionService {
     this.events = events;
   }
 
+  /** Removes only this order's association. Shared browser subscriptions stay active. */
+  @Override
+  public void detach(Long id, String token) {
+    OrderAccessService provider = access.getIfAvailable();
+    if (provider == null) {
+      throw new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Order access service is not available");
+    }
+    var queue = provider.locked(id, token);
+    queue.getOrder().setPushSubscription(null);
+  }
+
   @Override
   public void attach(Long id, String token, PushSubscriptionRequest request) {
     OrderAccessService provider = access.getIfAvailable();
