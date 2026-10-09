@@ -15,7 +15,7 @@ import org.springframework.http.HttpStatus;
 @TestConfiguration(proxyBeanMethods=false)
 public class OrderingTestDoubles {
  @Bean @Primary public Tokens fixtureTokens(){return new Tokens();}
- @Bean public Access fixtureAccess(QueueRepository queues,Tokens tokens){return new Access(queues,tokens);}
+ @Bean @Primary public Access fixtureAccess(QueueRepository queues,Tokens tokens){return new Access(queues,tokens);}
  public static class Tokens implements QueueTokenGenerator {
   private final AtomicLong sequence=new AtomicLong();public boolean failHash;
   public String generate(){return "ordering-test-token-"+sequence.incrementAndGet();}
