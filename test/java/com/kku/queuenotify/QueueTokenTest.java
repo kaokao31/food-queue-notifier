@@ -60,4 +60,20 @@ class QueueTokenTest {
           assertNotNull(ctx.getBean(QueueToken.class).hash("fixture"));
         });
   }
+  @Test void changingAnyTokenCharacterCannotMatchTheOriginalHash() {
+    String raw="AbCdEf0123456789_-owner-fixture";String hash=tokens.hash(raw);
+    for(int i=0;i<raw.length();i++){
+      char replacement=raw.charAt(i)=='x'?'y':'x';
+      String changed=raw.substring(0,i)+replacement+raw.substring(i+1);
+      assertFalse(tokens.matches(changed,hash),"Changed token character "+i);
+    }
+    assertTrue(tokens.matches(raw,hash));
+  }
+  @Test void tokensAreNotTrimmedCaseFoldedOrAcceptedAsStoredHash() {
+    String raw="CaseSensitive-owner-fixture";String hash=tokens.hash(raw);
+    for(String changed:new String[]{raw.toLowerCase(java.util.Locale.ROOT)," "+raw,raw+" ",hash})
+      assertFalse(tokens.matches(changed,hash));
+    assertFalse(tokens.matches(raw,hash.toUpperCase(java.util.Locale.ROOT)));
+    assertFalse(tokens.matches(raw,null));
+  }
 }
