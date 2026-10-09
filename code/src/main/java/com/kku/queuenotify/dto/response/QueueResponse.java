@@ -1,11 +1,13 @@
 package com.kku.queuenotify.dto.response;
 
 import com.kku.queuenotify.domain.enums.QueueStatus;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 // Builder ผ่าน record + static factory ก็เพียงพอสำหรับ DTO ที่ immutable
 public record QueueResponse(
     Long id,
     Integer queueNumber,
+    LocalDate queueDate,
     QueueStatus status,
     LocalDateTime statusChangedAt) {}

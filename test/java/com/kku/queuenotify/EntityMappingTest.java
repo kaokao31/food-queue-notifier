@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 
 class EntityMappingTest {
   @Test
-  void validatesV4MappingsAndPersistsSharedQueueIdAndItemSnapshots() throws Exception {
+  void validatesV5MappingsAndPersistsSharedQueueIdAndItemSnapshots() throws Exception {
     try (var db = PostgresTestDatabase.start()) {
       Flyway.configure().dataSource(db.url(), db.username(), db.password())
-          .locations("classpath:db/migration").target("4")
+          .locations("classpath:db/migration").target("5")
           .baselineOnMigrate(false).cleanDisabled(true).load().migrate();
       var configuration = new Configuration()
           .setProperty("hibernate.connection.driver_class", "org.postgresql.Driver")
@@ -25,7 +25,7 @@ class EntityMappingTest {
           .setProperty("hibernate.hbm2ddl.auto", "validate")
           .setProperty("hibernate.jdbc.time_zone", "UTC");
       for (Class<?> entity : new Class<?>[]{Customer.class, NotificationPreference.class,
-          MenuItem.class, MenuImage.class, Order.class, OrderItem.class, Queue.class,
+          MenuItem.class, MenuImage.class, DailyQueueCounter.class, Order.class, OrderItem.class, Queue.class,
           PushSubscription.class, NotificationLog.class}) {
         configuration.addAnnotatedClass(entity);
       }
@@ -44,7 +44,7 @@ class EntityMappingTest {
               .quantity(2).unitPrice(new BigDecimal("22.50"))
               .menuItemName("Original menu").subtotal(new BigDecimal("45.00")).build();
           order.getOrderItems().add(item);
-          var queue = Queue.builder().order(order).queueNumber(1)
+          var queue = Queue.builder().order(order).queueNumber(1).queueDate(java.time.LocalDate.of(2026,10,9))
               .status(QueueStatus.WAITING).tokenHash("0".repeat(64)).build();
           order.setQueue(queue);
           session.persist(order);
