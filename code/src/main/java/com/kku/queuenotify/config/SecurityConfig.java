@@ -54,7 +54,7 @@ public class SecurityConfig {
     };
   }
 
-  @Bean SecurityFilterChain security(HttpSecurity http,AuthenticationProvider staffAuthentication) throws Exception {
+  @Bean SecurityFilterChain security(HttpSecurity http,AuthenticationProvider staffAuthentication,org.springframework.core.env.Environment environment) throws Exception {
     var api=new AntPathRequestMatcher("/api/**");
     var login=new LoginUrlAuthenticationEntryPoint("/staff/login");
     http.authenticationProvider(staffAuthentication)
@@ -73,6 +73,10 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.PATCH,"/api/v1/queues/*/cancel").permitAll()
             // Menu mutations, order deletion and queue advancement require STAFF.
             .requestMatchers("/staff/**","/api/v1/menu-items/**","/api/v1/orders/**","/api/v1/queues/**").hasRole("STAFF")
+            .requestMatchers("/push-demo.html","/api/v1/push-demo/**").access((authentication,context)->
+                new org.springframework.security.authorization.AuthorizationDecision(
+                    environment.acceptsProfiles(org.springframework.core.env.Profiles.of("push-demo"))
+                    && authentication.get().getAuthorities().stream().anyMatch(role->role.getAuthority().equals("ROLE_STAFF"))))
             .anyRequest().denyAll())
         .formLogin(form->form.loginPage("/staff/login").loginProcessingUrl("/staff/login")
             .defaultSuccessUrl("/staff",true).failureUrl("/staff/login?error").permitAll())
