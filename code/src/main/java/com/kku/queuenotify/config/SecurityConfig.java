@@ -60,6 +60,8 @@ public class SecurityConfig {
     http.authenticationProvider(staffAuthentication)
         .authorizeHttpRequests(auth->auth
             .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+            .requestMatchers(HttpMethod.GET,"/swagger-ui.html","/swagger-ui/**",
+                "/v3/api-docs","/v3/api-docs/**","/v3/api-docs.yaml").hasRole("STAFF")
             .requestMatchers(HttpMethod.GET,"/","/queue/*","/staff/login","/assets/**","/sw.js",
                 "/api/v1/menu-items","/api/v1/menu-items/*","/api/v1/menu-items/*/image",
                 "/api/v1/push/public-key","/api/v1/csrf","/actuator/health","/error").permitAll()
