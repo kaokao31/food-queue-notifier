@@ -32,9 +32,27 @@ class BrowserWebPushSenderTest {
             Base64.getUrlEncoder().withoutPadding().encodeToString(new byte[16])));
   }
   private BrowserWebPushSender sender(WebPushProperties p,BrowserWebPushSender.Transport transport) {
-    return new BrowserWebPushSender(p,new SubscriptionValidator(),new ObjectMapper(),transport);
+    return new BrowserWebPushSender(p,new PushConfigurationServiceImpl(p),
+        new SubscriptionValidator(),new ObjectMapper(),transport);
   }
   private PushPayload payload() { return PushPayload.ready(8L,"คิวพร้อมแล้ว"); }
+  @Test void usesInjectedPublicKeyInsteadOfReadingPropertiesDirectly() {
+    var p=settings();String publicKey=p.getPublicKey();p.setPublicKey(null);
+    AtomicInteger configurationCalls=new AtomicInteger();AtomicInteger transportCalls=new AtomicInteger();
+    var sender=new BrowserWebPushSender(p,()->{configurationCalls.incrementAndGet();return publicKey;},
+        new SubscriptionValidator(),new ObjectMapper(),r->{transportCalls.incrementAndGet();return 201;});
+    assertEquals(201,sender.send(subscription(),payload()));
+    assertEquals(1,configurationCalls.get());assertEquals(1,transportCalls.get());
+  }
+  @Test void injectedConfigurationFailureStopsBeforeTransportWithoutLeakingDetails() {
+    AtomicInteger transportCalls=new AtomicInteger();
+    var sender=new BrowserWebPushSender(settings(),()->{throw new IllegalArgumentException("secret-fixture");},
+        new SubscriptionValidator(),new ObjectMapper(),r->{transportCalls.incrementAndGet();return 201;});
+    var ex=assertThrows(PushDemoException.class,()->sender.send(subscription(),payload()));
+    assertEquals(HttpStatus.SERVICE_UNAVAILABLE,ex.getStatus());
+    assertEquals("Web Push configuration is missing or invalid",ex.getMessage());
+    assertNull(ex.getCause());assertEquals(0,transportCalls.get());
+  }
   @Test void missingConfigurationFails503BeforeTransport() {
     AtomicInteger calls=new AtomicInteger();var sender=sender(new WebPushProperties(),r->{calls.incrementAndGet();return 201;});
     var ex=assertThrows(PushDemoException.class,()->sender.send(subscription(),payload()));
