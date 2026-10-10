@@ -1,19 +1,11 @@
 (function (root) {
   'use strict';
-  const images = Object.freeze({
-    'ข้าวกะเพราไก่': 'basil-chicken-v2.webp',
-    'ข้าวผัดไข่': 'egg-fried-rice-v2.avif',
-    'ข้าวไก่ทอด': 'crispy-chicken-rice-v2.jpg',
-    'ชาไทยเย็น': 'thai-tea-v2.jpg',
-    'น้ำมะนาว': 'limeade-v2.jpg',
-    'ผัดไทย': 'pad-thai-v2.webp'
-  });
 
   function foodPhoto(menu) {
     if (menu.imageUrl) return menu.imageUrl;
     const fallback = menu.category === 'เครื่องดื่ม' ? 'limeade-v2.jpg'
       : menu.category === 'เส้น' ? 'pad-thai-v2.webp' : 'egg-fried-rice-v2.avif';
-    return '/assets/food/' + (images[menu.name] || fallback);
+    return '/assets/food/' + fallback;
   }
 
   function createMenuRenderer({ escapeHtml, money }) {
