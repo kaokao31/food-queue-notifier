@@ -1,6 +1,7 @@
 package com.kku.queuenotify.mapper;
 
 import com.kku.queuenotify.domain.entity.MenuItem;
+import com.kku.queuenotify.common.MenuPhotos;
 import com.kku.queuenotify.dto.response.MenuItemResponse;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +15,6 @@ public class MenuItemMapper {
         m.getPrice(),
         m.getPrepTimeMinutes(),
         m.isAvailable(),
-        m.getImageKey() == null
-            ? null
-            : "/api/v1/menu-items/" + m.getId() + "/image?v=" + m.getImageKey());
+        MenuPhotos.imageUrl(m.getId(), m.getImageKey()));
   }
 }
