@@ -1,6 +1,7 @@
 package com.kku.queuenotify.service.impl;
 
 import com.kku.queuenotify.domain.entity.MenuItem;
+import com.kku.queuenotify.common.MenuPhotos;
 import com.kku.queuenotify.dto.request.MenuItemRequest;
 import com.kku.queuenotify.dto.response.*;
 import com.kku.queuenotify.exception.ApiException;
@@ -53,6 +54,10 @@ public class MenuServiceImpl implements MenuService {
   }
 
   private MenuItemResponse save(MenuItem m, MenuItemRequest r) {
+    if (m.getImageKey() == null) {
+      m.setImageKey(MenuPhotos.initialKey(m.getId() == null ? r.name() : m.getName(),
+          m.getId() == null ? r.category() : m.getCategory()));
+    }
     m.setName(r.name().trim());
     m.setCategory(r.category());
     m.setPrice(r.price());
