@@ -1,6 +1,6 @@
 # Handover
 
-อ้างอิง `develop` baseline `64b3ce7` หลัง PR #80 วันที่ 10 ตุลาคม 2026 เอกสารนี้สรุป implementation ที่รวมแล้วและงานส่งมอบที่ยังเหลือ ไม่ใช่การรับรอง final release
+อ้างอิง `develop` deployment revision `c07292e` หลัง PR #81 วันที่ 10 ตุลาคม 2026 เอกสารนี้สรุป implementation ที่รวมแล้วและงานส่งมอบที่ยังเหลือ ไม่ใช่การรับรอง final release
 
 ## ส่วนที่รวมแล้ว
 
@@ -39,16 +39,16 @@ Swagger UI ที่ /swagger-ui/index.html และ OpenAPI ที่ /v3/api-
 - ผล full Java suite ที่ทีมส่งล่าสุดคือ **285 tests** ไม่มี Failures/Errors/Skipped ใน C-R17 บนเครื่องคมชาญ ก่อน merge PR #78
 - ผล JavaScript ที่ทีมส่งล่าสุดผ่าน **14 ไฟล์ทดสอบ** ในงานแก้รูปเมนู ส่วนการแก้เอกสารภายหลังไม่ได้รันชุดทดสอบใหม่
 - ผู้ใช้ทดสอบจริงแล้วว่ารูปคงเดิมเมื่อเปลี่ยนชื่อ/หมวดหมู่ และ Swagger อ่านเมนู ID 1 ได้ HTTP 200
-- เคยรับ Web Push จริงบน Chrome แล้ว แต่ผลอัตโนมัติจำลอง provider และ HTTP ACCEPTED ไม่ยืนยันว่าอุปกรณ์แสดง popup ทุกครั้ง ต้องเก็บหลักฐานอุปกรณ์และปลายทางที่ใช้ส่งมอบอีกครั้ง
+- วันที่ 10 ตุลาคม 2026 ตั้งค่า Neon/Render แล้ว ผู้ใช้ยืนยันสร้างออเดอร์และรับ Web Push เลขคิวจริงถูกต้องบน [เว็บออนไลน์](https://food-queue-notifier-1.onrender.com/) ดู [Deployment test report](deployment-test-report.md) ผลรอบนี้ไม่ยืนยันทุกอุปกรณ์ และยังต้องเก็บภาพ/รายละเอียดอุปกรณ์สำหรับ final acceptance
 
 `java tools/GenerateVapidKeys.java --check` ตรวจ key pair ใหม่ที่สร้างในหน่วยความจำ ไม่ได้ตรวจ keys ที่ตั้งใน environment และไม่ได้ทดสอบส่งไป provider
 
 ## งานส่งมอบที่ยังเหลือ
 
 - ตรวจเอกสารที่อ้าง baseline เก่า เช่นรายงานทดสอบและ acceptance โดยคงวันที่/ผลเดิมเป็นหลักฐานตามจริง ไม่เปลี่ยนผลเก่าให้ดูเหมือนเพิ่งทดสอบ
-- เลือก cloud database/deployment และตั้งค่า HTTPS, credentials, STAFF/VAPID/mode/profile ของ environment ที่ใช้จริง ยังไม่มี deployment URL ที่ยืนยันแล้ว
-- Compose app ปัจจุบันรับเฉพาะ DB/PORT ต้องเพิ่มการส่ง STAFF/VAPID/mode/profile ก่อนใช้ container ทดลองฟีเจอร์เหล่านี้ CI ยังไม่มี publish/deploy อัตโนมัติ
+- Neon PostgreSQL 16 และ Render Docker Free/Singapore ตั้งค่าแล้ว เก็บ DB/STAFF/VAPID credentials ใน Render Environment; เมื่อเปลี่ยน credentials ให้ปรับแอปทุก environment ที่ใช้ฐานเดียวกัน ไม่ commit secrets
+- Compose app ปัจจุบันรับเฉพาะ DB/PORT ต้องเพิ่มการส่ง STAFF/VAPID/mode/profile ก่อนใช้ container ทดลองฟีเจอร์เหล่านี้ GitHub Actions ยังไม่มี publish/deploy job; Render deploy แยกจาก workflow และให้ตรวจการตั้งค่า Auto-Deploy ของ service
 - ทำ final acceptance บน revision/ปลายทางที่จะส่งมอบ บันทึก SHA, ผล tests, อุปกรณ์/เบราว์เซอร์ และหลักฐานการสั่งจนรับอาหาร รวมทั้งกรณีสิทธิ์/CSRF/terminal state
-- จัดสไลด์ ภาพประกอบ/หลักฐาน review และ release เข้า main หลังตรวจครบ ดู [Acceptance](acceptance.md)
+- จัดสไลด์ ภาพประกอบ/หลักฐาน review และ release เข้า main หลังตรวจครบ จากนั้นเปลี่ยน Render ให้ติดตาม main, deploy และตรวจ revision ที่ส่งมอบอีกครั้ง ดู [Acceptance](acceptance.md)
 
 เมื่อเปลี่ยน behavior ให้รัน JS suites และ `mvn clean verify` โดย unset NOTIFICATION_MODE ใน subshell ตาม README ส่วนการแก้เอกสารล้วนตรวจ diff, ลิงก์และแผนภาพโดยไม่อ้างว่ารัน tests ใหม่

@@ -20,9 +20,9 @@
 - ผล `mvn clean verify` ของ C-R17 ผ่าน **285 tests** ไม่มี Failures/Errors/Skipped เมื่อ 10 ตุลาคม 2026 บนเครื่องคมชาญ ก่อน merge PR #78
 - ผล JavaScript ล่าสุดผ่าน **14 ไฟล์ทดสอบ** เมื่อแก้ UI รูปเมนู
 - ทดสอบจริงแล้วว่ารูปเมนูคงเดิมหลังเปลี่ยนชื่อ/หมวดหมู่ และ Swagger เรียกเมนู ID 1 ได้ HTTP 200
-- เคยรับ Web Push จริงบน Chrome แล้ว แต่ HTTP 201/ACCEPTED ของ provider ไม่ใช่หลักฐานว่าอุปกรณ์แสดงแจ้งเตือนทุกครั้ง
+- วันที่ 10 ตุลาคม 2026 ผู้ทดสอบยืนยันสร้างออเดอร์บน Neon และรับ Web Push ที่แสดงเลขคิวจริงถูกต้องบน URL ของ Render แล้ว ดู [Deployment test report](doc/deployment-test-report.md) ผลนี้ครอบคลุมรอบที่ทดสอบ ไม่ใช่การรับรอง popup ทุกอุปกรณ์
 
-baseline ที่รวมงานข้างต้นคือ `develop` commit `25447e6` ยังไม่ได้เลือกและตั้งค่า cloud database/deployment และยังต้องทำ final acceptance, ตรวจเอกสารแบบจำลอง/SOLID/Design Patterns และจัดเตรียมสไลด์กับหลักฐานส่งงาน จึงยังไม่ถือเป็น final release
+Deployment ที่ทดสอบใช้ `develop` commit `c07292e` หลัง PR #81 ใช้ Neon PostgreSQL และ Render Docker ผ่าน HTTPS แล้ว เอกสาร SOLID/Design Patterns และแบบจำลองได้รับการปรับใน PR #80–81 ยังต้องทำ final acceptance, จัดเตรียมสไลด์/หลักฐาน และ release เข้า `main` จึงยังไม่ถือเป็น final release
 
 ## เทคโนโลยีและโครงสร้าง
 
@@ -66,7 +66,7 @@ mvn spring-boot:run
 
 การรัน Maven ใช้ฐานข้อมูลเริ่มต้น `queuenotify_restart` ที่ `localhost:5433` โดย Compose เปิด PostgreSQL ที่ `127.0.0.1:5433` ผู้ใช้/รหัส `postgres` เป็นค่าเริ่มต้นสำหรับทดลองในเครื่อง ตั้งค่าเพิ่มเติมผ่าน `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT` ตาม [.env.example](.env.example) ถ้าเปลี่ยน credentials ของ Compose ต้อง export ค่าเดียวกันให้ Maven ด้วย เพราะ Maven ไม่โหลด `.env` อัตโนมัติ
 
-Flyway ใช้ migration **V1–V6** และ Hibernate ใช้ `ddl-auto: validate` โดย V6 บันทึกรูปเริ่มต้นให้เมนูเดิมที่ยังไม่มีรูป เพื่อรักษารูปเมื่อเปลี่ยนชื่อ/หมวดหมู่และคงรูปอัปโหลดที่มีอยู่ สำรองข้อมูลก่อนใช้กับฐานเดิม และอย่าแก้ migration ที่รันไปแล้ว ดู [Migration guide](doc/migration.md) สำหรับ V1–V5; V6 อยู่ที่ `code/src/main/resources/db/migration/V6__persistent_menu_photos.sql`
+Flyway ใช้ migration **V1–V6** และ Hibernate ใช้ `ddl-auto: validate` โดย V6 บันทึกรูปเริ่มต้นให้เมนูเดิมที่ยังไม่มีรูป เพื่อรักษารูปเมื่อเปลี่ยนชื่อ/หมวดหมู่และคงรูปอัปโหลดที่มีอยู่ สำรองข้อมูลก่อนใช้กับฐานเดิม และอย่าแก้ migration ที่รันไปแล้ว ดู [Migration guide](doc/migration.md) สำหรับ V1–V6
 
 ## Swagger / OpenAPI
 
@@ -126,7 +126,7 @@ node --test test/js/*.test.cjs
 
 คำสั่ง subshell ปิดค่า Web Push เฉพาะช่วงทดสอบ เพื่อให้ tests ที่ตรวจ default console ทำงานตรงตามเงื่อนไข แล้วคืน environment ของหน้าต่างเดิม PostgreSQL tests ใช้ embedded database แยกจากฐานแอป ไม่ต้องเปิด Compose เพื่อรัน tests
 
-CI ตรวจ JavaScript และ Maven พร้อมเก็บ Surefire reports แต่ยังไม่มีการ deploy อัตโนมัติ ผลอัตโนมัติจำลอง provider และไม่ยืนยันการแสดงแจ้งเตือนจริงบนอุปกรณ์ ดู [Frontend tests](doc/frontend-test-report.md), [State tests](doc/state-test-report.md) และ [Push tests](doc/push-test-report.md); จำนวน tests ในรายงานเก่าเป็นผลตาม baseline ของรายงานนั้น
+GitHub Actions ตรวจ JavaScript และ Maven พร้อมเก็บ Surefire reports โดย workflow ยังไม่มี deploy job การ deploy เว็บทำผ่าน Render แยกจาก workflow; ตรวจการตั้งค่า Auto-Deploy ของ service ก่อนใช้อ้างอิง ผลอัตโนมัติจำลอง provider และไม่ยืนยันการแสดงแจ้งเตือนจริงบนอุปกรณ์ ดู [Frontend tests](doc/frontend-test-report.md), [State tests](doc/state-test-report.md) และ [Push tests](doc/push-test-report.md); จำนวน tests ในรายงานเก่าเป็นผลตาม baseline ของรายงานนั้น
 
 ## Docker และการเผยแพร่
 
@@ -140,7 +140,36 @@ Compose เปิด port เฉพาะ localhost และเก็บฐา�
 
 **Compose app ปัจจุบันรับเฉพาะ DB/PORT** ยังไม่ได้ส่ง STAFF, VAPID, notification mode หรือ profile ให้ container การรันทั้งแอปด้วย Compose จึงยังไม่ใช่ขั้นตอนตั้งค่า STAFF/Web Push ที่ครบ ให้ใช้วิธี Maven ข้างต้นสำหรับการทดลองฟีเจอร์เหล่านี้ หรือปรับ environment ของ container ก่อนใช้
 
-ยังไม่มี cloud database หรือ deployment URL ที่ตั้งค่าและยืนยันแล้ว การเผยแพร่ต้องกำหนด HTTPS, database, secrets/environment และตรวจ acceptance บนปลายทางก่อนส่งมอบ ดู [Deployment diagram](doc/diagrams/deployment.md) และ [Acceptance](doc/acceptance.md)
+### เว็บออนไลน์ที่ทดสอบแล้ว
+
+- [หน้าลูกค้า](https://food-queue-notifier-1.onrender.com/)
+- [หน้าล็อกอินพนักงาน](https://food-queue-notifier-1.onrender.com/staff/login)
+- [Swagger UI](https://food-queue-notifier-1.onrender.com/swagger-ui/index.html) — ต้อง login STAFF ก่อน
+
+ใช้ **Render Web Service / Docker / Free / Singapore** และ **Neon PostgreSQL 16 / Free / Singapore** บน branch ฐานข้อมูล `production`, database `neondb` ชื่อนี้เป็นชื่อ branch ของ Neon ไม่ใช่สถานะ final release ของโค้ด แอปที่ตรวจใช้ branch Git `develop`, SHA `c07292e`
+
+Render ใช้ Dockerfile ที่ราก repository และ Root Directory ว่าง ตั้งค่าต่อไปนี้ใน Environment ของ service:
+
+| ตัวแปร | ค่า/วิธีตั้ง |
+|---|---|
+| `DB_URL` | `jdbc:postgresql://<NEON_DIRECT_HOST>:5432/neondb?sslmode=require&channelBinding=require` |
+| `DB_USERNAME` | role ของ Neon ที่ใช้เชื่อมต่อ |
+| `DB_PASSWORD` | รหัสผ่าน role ของ Neon |
+| `STAFF_USERNAME` | ชื่อบัญชีพนักงาน |
+| `STAFF_PASSWORD` | รหัสใหม่อย่างน้อย 12 ตัวอักษรและไม่เกิน 72 UTF-8 bytes |
+| `NOTIFICATION_MODE` | `webpush` |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | key pair เดียวกันที่ทดสอบสำเร็จ |
+| `VAPID_SUBJECT` | `mailto:<CONTACT_EMAIL>` โดยใช้อีเมลจริง |
+
+ใช้ Neon direct connection สำหรับชุดนี้ เพราะ Flyway ใช้ datasource เดียวกันในการ migrate แอปรับ `PORT` จาก Render; log deployment ที่ตรวจแสดง port 10000 ไม่ต้องใส่ credentials ลงโค้ดหรือ commit ไฟล์ secrets
+
+Flyway V1–V6 บน Neon ผ่านแล้ว การสร้างฐานใหม่ไม่ได้ย้ายข้อมูลเดิมจาก Docker ไปด้วย Maven ในเครื่องและ Render จะอ่าน/เขียนข้อมูลร่วมกันเมื่อชี้ Neon database เดียวกัน
+
+เมื่อเปลี่ยนจาก localhost เป็น URL นี้ ให้สร้างออเดอร์ใหม่และสมัครแจ้งเตือนสำหรับ origin ใหม่ ผลทดสอบที่ผู้ใช้ยืนยันคือสร้างออเดอร์และรับแจ้งเตือนเลขคิวถูกต้อง Render Free อาจพักเมื่อไม่มีการใช้งาน ทำให้การเปิดเว็บครั้งแรกต้องรอ
+
+หลังเอกสาร/สไลด์และ final acceptance ครบ ให้เปิด PR `develop` → `main` แล้วเปลี่ยน Render ให้ deploy revision จาก `main` พร้อมทดสอบและบันทึก SHA อีกครั้ง การ merge Git ไม่ได้เปลี่ยน branch ที่ Render ติดตามให้เอง
+
+ดู [Deployment diagram](doc/diagrams/deployment.md), [Deployment test report](doc/deployment-test-report.md) และ [Acceptance](doc/acceptance.md)
 
 ## Development workflow
 
@@ -149,4 +178,4 @@ Compose เปิด port เฉพาะ localhost และเก็บฐา�
 - สมาชิกทำงานและ push บน branch ของตนเอง
 - รวมงานผ่าน Pull Request และให้สมาชิกอีกคน review/approve ก่อน merge
 
-ดู [Handover](doc/handover.md) และ [Team review](doc/team-review.md) โดยตรวจ baseline ของแต่ละเอกสาร งานถัดไปคือปรับเอกสารประกอบที่ยังล้าสมัย เลือกและตั้งค่าการเผยแพร่ ทำ final acceptance และจัดเตรียมสไลด์/หลักฐานส่งงาน
+ดู [Handover](doc/handover.md) และ [Team review](doc/team-review.md) โดยตรวจ baseline ของแต่ละเอกสาร งานถัดไปคือปรับเอกสารประกอบที่ยังล้าสมัย อัปเดตหลักฐานการเผยแพร่ ทำ final acceptance และจัดเตรียมสไลด์/หลักฐานส่งงาน
