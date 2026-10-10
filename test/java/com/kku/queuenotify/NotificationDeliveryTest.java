@@ -44,7 +44,7 @@ class NotificationDeliveryTest {
   @BeforeEach void setup() {
     var order=new Order();order.setId(8L);var sub=new PushSubscription();
     sub.setEndpoint("https://fcm.googleapis.com/fcm/send/test-only");sub.setP256dh("test-public");sub.setAuth("test-auth");sub.setActive(true);order.setPushSubscription(sub);
-    queue=new Queue();queue.setId(8L);queue.setStatus(QueueStatus.READY);queue.setOrder(order);
+    queue=new Queue();queue.setId(8L);queue.setQueueNumber(4);queue.setStatus(QueueStatus.READY);queue.setOrder(order);
     when(queues.lockById(8L)).thenAnswer(invocation->{assertTrue(TransactionSynchronizationManager.isActualTransactionActive());return Optional.of(queue);});
     when(logs.existsByQueueIdAndEventType(8L,"READY")).thenAnswer(invocation->stored.get()!=null);
     when(logs.saveAndFlush(any())).thenAnswer(invocation->{assertTrue(TransactionSynchronizationManager.isActualTransactionActive());NotificationLog log=invocation.getArgument(0);log.setId(42L);stored.set(log);return log;});
@@ -62,6 +62,8 @@ class NotificationDeliveryTest {
       assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
       assertEquals("PENDING",stored.get().getDeliveryStatus());
       assertEquals("/queue/8",((com.kku.queuenotify.dto.response.PushPayload)invocation.getArgument(1)).url());
+      assertEquals("อาหารคิว 4 พร้อมแล้วเชิญรับอาหารได้เลย",
+          ((com.kku.queuenotify.dto.response.PushPayload)invocation.getArgument(1)).body());
       return 201;
     });
     context("webpush",true).run(ctx->{

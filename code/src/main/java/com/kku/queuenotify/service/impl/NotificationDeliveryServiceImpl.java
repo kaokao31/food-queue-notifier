@@ -83,7 +83,8 @@ public class NotificationDeliveryServiceImpl implements NotificationDeliveryServ
     log.setChannel(push?NotificationChannel.PUSH:NotificationChannel.CONSOLE);
     log.setDeliveryStatus("PENDING");log.setMessage("Notification attempt claimed");log.setSuccess(false);
     log.setAttemptedAt(now());logs.saveAndFlush(log);
-    return new Claim(log.getId(),target,PushPayload.ready(queueId,"อาหารของคุณพร้อมรับแล้ว"));
+    return new Claim(log.getId(),target,PushPayload.ready(queueId,
+        "อาหารคิว " + queue.getQueueNumber() + " พร้อมแล้วเชิญรับอาหารได้เลย"));
   }
 
   private LocalDateTime now() { return LocalDateTime.ofInstant(clock.instant(),ZoneOffset.UTC); }
