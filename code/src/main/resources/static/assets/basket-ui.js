@@ -34,7 +34,7 @@
   function draw() {
    elements.items.innerHTML = model.getItems().map(line => {
     const id = escapeHtml(line.menuItemId), name = escapeHtml(line.name);
-    return `<div class="cart-row"><div><h3>${name}</h3><span class="small muted">${money(line.price)}</span><button data-remove="${id}" aria-label="ลบ ${name} จากตะกร้า">ลบ</button></div><div class="qty"><button data-minus="${id}" aria-label="ลดจำนวน ${name}">−</button><input type="number" min="1" max="99" step="1" value="${line.quantity}" required inputmode="numeric" data-quantity="${id}" aria-label="จำนวนในตะกร้า ${name}" title="จำนวนเต็ม 1–99"><button data-plus="${id}" aria-label="เพิ่มจำนวน ${name}">+</button></div></div>`;
+    return `<div class="cart-row"><div><h3>${name}</h3><span class="cart-item-price">${money(line.price)}</span></div><div class="qty"><button data-minus="${id}" aria-label="ลดจำนวน ${name}">−</button><input type="number" min="1" max="99" step="1" value="${line.quantity}" required inputmode="numeric" data-quantity="${id}" aria-label="จำนวนในตะกร้า ${name}" title="จำนวนเต็ม 1–99"><button data-plus="${id}" aria-label="เพิ่มจำนวน ${name}">+</button></div></div>`;
    }).join('') || '<p class="muted">เลือกเมนูที่ชอบเพื่อเริ่มสั่ง</p>';
    elements.items.querySelectorAll('[data-quantity]').forEach(input => {
     input.oninput = () => {

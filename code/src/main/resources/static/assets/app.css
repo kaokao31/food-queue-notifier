@@ -7,3 +7,5 @@
 .queue-history-entry{margin:24px 0}.queue-history-entry p{margin:8px 0 0}.history-row{border-bottom:1px solid var(--line);padding:18px 0}.history-row p{margin:8px 0;overflow-wrap:anywhere}.history-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.history-link{color:var(--green);font-weight:700;font-size:14px}
 
 .menu-add{display:flex;align-items:center;gap:6px}.menu-add input,.qty input{width:60px;min-width:0;text-align:center;padding:7px 4px;font-size:16px}.qty{gap:5px}.cart-row>div:first-child{min-width:0}.menu-bottom:has(.menu-add){flex-wrap:wrap;gap:10px}.menu-add button{padding:7px 10px;font-size:13px}
+
+.cart-item-price{display:block;font-size:18px;font-weight:800;line-height:1.5;font-variant-numeric:tabular-nums}
