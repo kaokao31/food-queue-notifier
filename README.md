@@ -1,34 +1,134 @@
 # Food Queue Notifier
 
-โปรเจกต์ระบบแจ้งเตือนคิวรับอาหารและเครื่องดื่ม
-รายวิชา CP353002 Principles of Software Design and Development
+ระบบสั่งอาหารและแจ้งเตือนคิวรับอาหาร/เครื่องดื่ม สำหรับรายวิชา **CP353002 Principles of Software Design and Development**
 
-## สถานะปัจจุบัน
+ลูกค้าเลือกเมนู สั่งอาหาร และติดตามคิวด้วย token ของออเดอร์ พนักงานจัดการเมนูและเปลี่ยนสถานะคิว เมื่ออาหารพร้อม ระบบส่ง Web Push ไปยังเบราว์เซอร์ที่เชื่อมการแจ้งเตือนไว้
 
-มีหน้าเมนู ตะกร้า ประวัติ/ติดตามคิว หน้าจอพนักงานและ QR พร้อม persistence เมนู/ภาพเมนู ออเดอร์และเลขคิวรายวัน รวม C1–C11 สำหรับ token, owner/STAFF access, BCrypt login, CSRF, State และ Queue API แล้ว รวม T1–T15 สำหรับ subscription, Browser Push, AFTER_COMMIT observer, single-attempt delivery, STAFF log และ standalone demo แล้ว เอกสาร T16 อ้างอิง baseline `76a788a`; ผล Java full suite ล่าสุดผ่าน 247 tests บนเครื่องธีธัช ยังเหลือคมชาญ C12–C16 การตรวจอุปกรณ์จริงและ acceptance/deployment ของทีม จึงยังไม่ใช่ release ที่ผ่านการรับรองครบระบบ
+## สมาชิกและขอบเขตงาน
 
-## โครงสร้าง
+| ชื่อ–นามสกุล | รหัสนักศึกษา | Section | Branch | ส่วนรับผิดชอบ |
+|---|---|---|---|---|
+| นายกานดิทัต นามสุดตา | 673380392-1 | 3 | `kanditat_673380392-1_03` | หน้าเว็บ ตะกร้า ประวัติ/ติดตามคิว หน้าจอพนักงาน QR และ runtime/CI |
+| นายอนันต์เอกก์ ใหญ่พงศกร | 673380430-9 | 3 | `anunake_673380430-9_03` | schema/migration, persistence, เมนู/ภาพเมนู, ออเดอร์ เลขคิวรายวัน และ OpenAPI |
+| นายคมชาญ วรสาร | 673380396-3 | 3 | `komchan_673380396-3_03` | State, เปลี่ยนสถานะ/ยกเลิกคิว, token, สิทธิ์ออเดอร์, Security/CSRF และสิทธิ์ Swagger |
+| นายธีธัช ลิ้มประยูรวงศ์ | 673380408-2 | 4 | `teetach_673380408-2_04` | Subscription, Observer, Strategy/sender, delivery, log และ Browser Push |
 
-- `code/src/main/java`: controller, service, mapper, DTO, entity และ repository
-- `code/src/main/resources`: configuration, Flyway migration, template และ assets
-- `test/java`: Java/MVC/PostgreSQL tests
-- `test/js`, `test/fixtures`: การทดสอบ UI และ API fixtures เฉพาะชุดทดสอบ
-- `doc`: แบบจำลอง ข้อกำหนดรับงาน และคู่มือส่งต่อ
+## สถานะที่ตรวจแล้ว
 
-## รันในเครื่อง
+รวมงานตามแผน K/A/C/T ชุด 1–16 และงานเพิ่มเติมเรื่องรูปเมนูคงเดิมเมื่อเปลี่ยนชื่อ ข้อความแจ้งเตือนที่ใช้เลขคิวจริง การรับ Push configuration ผ่าน interface และ Swagger/OpenAPI พร้อมสิทธิ์ STAFF แล้ว
 
-ใช้ JDK 21 สำหรับ build (โค้ด compile target Java 17), Maven 3.9 และ Node.js สำหรับ JS tests
+- ผล `mvn clean verify` ของ C-R17 ผ่าน **285 tests** ไม่มี Failures/Errors/Skipped เมื่อ 10 ตุลาคม 2026 บนเครื่องคมชาญ ก่อน merge PR #78
+- ผล JavaScript ล่าสุดผ่าน **14 ไฟล์ทดสอบ** เมื่อแก้ UI รูปเมนู
+- ทดสอบจริงแล้วว่ารูปเมนูคงเดิมหลังเปลี่ยนชื่อ/หมวดหมู่ และ Swagger เรียกเมนู ID 1 ได้ HTTP 200
+- เคยรับ Web Push จริงบน Chrome แล้ว แต่ HTTP 201/ACCEPTED ของ provider ไม่ใช่หลักฐานว่าอุปกรณ์แสดงแจ้งเตือนทุกครั้ง
+
+baseline ที่รวมงานข้างต้นคือ `develop` commit `25447e6` ยังไม่ได้เลือกและตั้งค่า cloud database/deployment และยังต้องทำ final acceptance, ตรวจเอกสารแบบจำลอง/SOLID/Design Patterns และจัดเตรียมสไลด์กับหลักฐานส่งงาน จึงยังไม่ถือเป็น final release
+
+## เทคโนโลยีและโครงสร้าง
+
+ใช้ Spring Boot 3.2.5, Spring MVC/Security/Data JPA, PostgreSQL 16, Flyway, Thymeleaf และ JavaScript ฝั่งเบราว์เซอร์ เอกสาร API ใช้ springdoc-openapi 2.5.0 และ Swagger UI ระบบ Push ใช้ Service Worker และ VAPID
+
+ใช้ **JDK 21** สำหรับ build/run โดย compile target เป็น Java 17, Maven 3.9 และ Node.js 24 LTS สำหรับ JavaScript tests
+
+| ตำแหน่ง | เนื้อหา |
+|---|---|
+| `code/src/main/java` | controller, service/interface, mapper, DTO, entity และ repository |
+| `code/src/main/resources` | configuration, Flyway migration, template และ static assets |
+| `test/java` | unit, MVC/Security และ PostgreSQL integration tests |
+| `test/js`, `test/fixtures` | UI/Service Worker tests และข้อมูลจำลองเฉพาะการทดสอบ |
+| `doc` | แบบจำลอง รายงานทดสอบ acceptance และคู่มือส่งต่อ |
+| `tools/GenerateVapidKeys.java` | เครื่องมือสร้าง VAPID key pair สำหรับการตั้งค่าในเครื่อง |
+
+คำขอจากหน้าเว็บผ่าน Controller → Service interface/implementation → Repository → PostgreSQL โดยใช้ DTO/Mapper สำหรับข้อมูล API การเปลี่ยนสถานะคิวใช้ State และเผยแพร่ event ภายใน transaction; Observer รับ event หลัง commit แล้วใช้ notification Strategy ส่งหรือแสดง preview
+
+ดู [ER](doc/diagrams/er.md), [State](doc/diagrams/state.md), [Sequence สร้างออเดอร์](doc/diagrams/sequence-create.md), [Sequence READY](doc/diagrams/sequence-ready.md), [Sequence subscription](doc/diagrams/sequence-subscribe.md), [Security/State](doc/security-and-state.md), [SOLID](doc/solid-analysis.md) และ [Design Patterns](doc/design-patterns.md) เอกสารบางฉบับระบุ baseline เก่า ให้ตรวจวันที่และขอบเขตของแต่ละฉบับก่อนใช้อ้างอิง
+
+## รันเว็บในเครื่อง
+
+คำสั่งต่อไปนี้ใช้ Git Bash บน Windows โดยเปิด Docker Desktop ก่อน ปรับตำแหน่ง JDK ให้ตรงกับเครื่องตนเองหาก Java/Maven ยังไม่ใช้ JDK 21
 
 ```bash
-docker compose up -d db
+cd "$USERPROFILE/food-queue-notifier-restart"
+java -version
+mvn -version
+
+export STAFF_USERNAME="staff"
+read -r -s -p "ตั้งรหัสพนักงานอย่างน้อย 12 ตัวอักษร: " STAFF_PASSWORD
+echo
+export STAFF_PASSWORD
+export NOTIFICATION_MODE="console"
+
+docker compose up -d db &&
 mvn spring-boot:run
 ```
 
-เปิด http://localhost:8080/ ฐานข้อมูล default คือ `queuenotify_restart` บน localhost:5433 ผู้ใช้/รหัสผ่าน `postgres` สำหรับการทดลองในเครื่อง การตั้งค่าใช้ environment `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT` ตาม `.env.example`; การรัน Maven ไม่อ่าน `.env` อัตโนมัติ ถ้าเปลี่ยนค่าใน Compose ให้ export ค่าเดียวกันก่อนรัน Maven
+เปิด [หน้าลูกค้า](http://localhost:8080/) และ [หน้าล็อกอินพนักงาน](http://localhost:8080/staff/login) ใช้ username/password ที่ตั้งเองข้างต้น รหัสผ่านต้องมีอย่างน้อย 12 ตัวอักษรและไม่เกิน 72 UTF-8 bytes รหัสว่างทำให้ login ไม่ได้ ไม่มีรหัสผ่านเริ่มต้นที่ใช้งานได้ และข้อมูลพนักงานในระบบใช้ BCrypt
 
-ใช้ฐานข้อมูลสำหรับงานรอบนี้โดยเฉพาะและสำรองก่อนนำ migration ไปใช้กับข้อมูลเดิม Flyway ทำ migration V1–V5 และ Hibernate ตรวจ schema ด้วย `ddl-auto: validate`
+การรัน Maven ใช้ฐานข้อมูลเริ่มต้น `queuenotify_restart` ที่ `localhost:5433` โดย Compose เปิด PostgreSQL ที่ `127.0.0.1:5433` ผู้ใช้/รหัส `postgres` เป็นค่าเริ่มต้นสำหรับทดลองในเครื่อง ตั้งค่าเพิ่มเติมผ่าน `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT` ตาม [.env.example](.env.example) ถ้าเปลี่ยน credentials ของ Compose ต้อง export ค่าเดียวกันให้ Maven ด้วย เพราะ Maven ไม่โหลด `.env` อัตโนมัติ
 
-## รันทั้งแอปด้วย Docker
+Flyway ใช้ migration **V1–V6** และ Hibernate ใช้ `ddl-auto: validate` โดย V6 บันทึกรูปเริ่มต้นให้เมนูเดิมที่ยังไม่มีรูป เพื่อรักษารูปเมื่อเปลี่ยนชื่อ/หมวดหมู่และคงรูปอัปโหลดที่มีอยู่ สำรองข้อมูลก่อนใช้กับฐานเดิม และอย่าแก้ migration ที่รันไปแล้ว ดู [Migration guide](doc/migration.md) สำหรับ V1–V5; V6 อยู่ที่ `code/src/main/resources/db/migration/V6__persistent_menu_photos.sql`
+
+## Swagger / OpenAPI
+
+1. Login ที่ [หน้าพนักงาน](http://localhost:8080/staff/login) ในเบราว์เซอร์เดียวกัน
+2. เปิด [Swagger UI](http://localhost:8080/swagger-ui/index.html)
+3. เลือก `GET /api/v1/menu-items` → **Try it out → Execute** เพื่อดูรายการ หรือใช้ ID จากรายการกับ `GET /api/v1/menu-items/{id}`
+
+เอกสาร JSON อยู่ที่ [OpenAPI JSON](http://localhost:8080/v3/api-docs) และ YAML ที่ [OpenAPI YAML](http://localhost:8080/v3/api-docs.yaml) ทั้งหน้าเอกสารและไฟล์ที่เกี่ยวข้องอนุญาตเฉพาะ GET และ STAFF ผู้ที่ยังไม่ login จะถูกส่งไป `/staff/login`; ผู้ที่ login แต่ไม่มี STAFF จะได้รับ 403
+
+สำหรับ POST/PUT/PATCH/DELETE ให้เรียก `GET /api/v1/csrf` ก่อน แล้วคัดลอกค่า `token` ไปที่ **Authorize → csrfToken** เพื่อส่ง header `X-CSRF-TOKEN` โดยต้องขอ token ใหม่หลัง login/logout เบราว์เซอร์ส่ง `JSESSIONID` ของ session ที่ login ให้อัตโนมัติ; Authorize ไม่ได้สร้าง session พนักงานให้
+
+API ของออเดอร์ลูกค้าใช้ `X-Queue-Token` ที่คืนตอนสร้างออเดอร์แต่ละรายการ ผู้ใช้ STAFF มีสิทธิ์เข้าถึงตามบทบาท จึงไม่ควรใช้การทดสอบใน Swagger ขณะ login STAFF เป็นหลักฐานว่าลูกค้าไม่สามารถเข้าถึงออเดอร์อื่นได้ ให้ตรวจ owner isolation ผ่าน integration tests และหน้าลูกค้าด้วย
+
+**Try it out สร้างหรือแก้ข้อมูลจริง** ให้ใช้ข้อมูลทดลอง สิทธิ์ในเอกสาร API เป็นคำอธิบาย; การบังคับสิทธิ์จริงอยู่ใน SecurityConfig และ services
+
+## เปิด Web Push จริง
+
+`NOTIFICATION_MODE=console` แสดง PREVIEW และไม่ส่งแจ้งเตือนไปเบราว์เซอร์ หากต้องการส่งจริงให้ใช้ `webpush` พร้อม VAPID key pair เดิมที่เบราว์เซอร์สมัครไว้
+
+หากยังไม่มี key pair ให้สร้าง **ครั้งแรกเท่านั้น** ไว้ภายนอก repository:
+
+```bash
+java tools/GenerateVapidKeys.java "$USERPROFILE/Downloads/queue-notify-vapid.env"
+```
+
+เครื่องมือจะไม่เขียนทับไฟล์เดิม เก็บ private key ไว้ในเครื่องและไม่ commit หรือส่งในภาพหน้าจอ อย่าสร้าง key ใหม่ทุกครั้งที่เปิดเว็บ เพราะ subscription เดิมผูกกับ public key ตอนสมัคร
+
+หลังหยุดเว็บเดิมด้วย `Ctrl+C` ให้ใช้ Git Bash หน้าต่างที่ตั้ง STAFF ไว้ แล้วโหลดและ export ค่า:
+
+```bash
+source "$USERPROFILE/Downloads/queue-notify-vapid.env"
+export VAPID_PUBLIC_KEY VAPID_PRIVATE_KEY
+read -r -p "อีเมลติดต่อสำหรับ VAPID: " vapid_contact_email
+export VAPID_SUBJECT="mailto:$vapid_contact_email"
+export NOTIFICATION_MODE="webpush"
+mvn spring-boot:run
+```
+
+ต้องตั้ง `VAPID_SUBJECT` เป็นอีเมลจริงแทน placeholder ในไฟล์ การ `source` อย่างเดียวไม่ได้ export ตัวแปรใหม่ให้ Java จึงต้องใช้ `export` ตามตัวอย่าง
+
+ทดสอบด้วยออเดอร์ใหม่: เปิดหน้าติดตามคิว → กดเปิด/เชื่อมแจ้งเตือน → อนุญาตเบราว์เซอร์ → พนักงานเปลี่ยนสถานะจน READY ข้อความใช้เลขคิวจริง เช่น **อาหารคิว 4 พร้อมแล้วเชิญรับอาหารได้เลย** Web Push ต้องใช้ secure context เช่น `localhost` หรือ HTTPS หากเปลี่ยน public key หรือ origin ให้สมัคร subscription ใหม่
+
+ตรวจผลส่งในหน้าพนักงาน: PREVIEW ไม่ได้ส่ง provider; ACCEPTED/HTTP 201 หมายถึง provider รับคำขอ ยังไม่ยืนยันว่าอุปกรณ์แสดง popup ระบบส่งหนึ่งครั้งและไม่มี automatic retry ดู [Push delivery](doc/push-delivery.md) และ [Push test report](doc/push-test-report.md)
+
+Standalone demo ที่ `/push-demo.html` เปิดเฉพาะ profile `push-demo` และ STAFF ต้องใช้ CSRF และเป็นการทดสอบแยกจากออเดอร์/production log
+
+## ทดสอบ
+
+```bash
+node --test test/js/*.test.cjs
+
+(
+  unset NOTIFICATION_MODE
+  mvn clean verify
+)
+```
+
+คำสั่ง subshell ปิดค่า Web Push เฉพาะช่วงทดสอบ เพื่อให้ tests ที่ตรวจ default console ทำงานตรงตามเงื่อนไข แล้วคืน environment ของหน้าต่างเดิม PostgreSQL tests ใช้ embedded database แยกจากฐานแอป ไม่ต้องเปิด Compose เพื่อรัน tests
+
+CI ตรวจ JavaScript และ Maven พร้อมเก็บ Surefire reports แต่ยังไม่มีการ deploy อัตโนมัติ ผลอัตโนมัติจำลอง provider และไม่ยืนยันการแสดงแจ้งเตือนจริงบนอุปกรณ์ ดู [Frontend tests](doc/frontend-test-report.md), [State tests](doc/state-test-report.md) และ [Push tests](doc/push-test-report.md); จำนวน tests ในรายงานเก่าเป็นผลตาม baseline ของรายงานนั้น
+
+## Docker และการเผยแพร่
 
 ```bash
 docker compose config --quiet
@@ -36,40 +136,17 @@ docker compose up --build -d
 docker compose logs app
 ```
 
-Compose เปิด port เฉพาะ localhost และเก็บข้อมูลใน named volume `queue_restart_data` คำสั่ง `docker compose down` หยุด container โดยเก็บ volume ไว้ Docker image build ข้าม tests; ให้รันชุดทดสอบแยกก่อนส่งมอบ ตรวจการส่ง STAFF/VAPID/profile environment ให้ container และ acceptance ก่อนเผยแพร่; Compose ปัจจุบันยังไม่ได้ส่งค่าเหล่านี้ให้ app
+Compose เปิด port เฉพาะ localhost และเก็บฐานข้อมูลใน volume `queue_restart_data` โดย `docker compose down` เก็บ volume ไว้ Docker image build ข้าม tests จึงต้องตรวจ tests แยกก่อนส่งมอบ
 
-## ทดสอบ
+**Compose app ปัจจุบันรับเฉพาะ DB/PORT** ยังไม่ได้ส่ง STAFF, VAPID, notification mode หรือ profile ให้ container การรันทั้งแอปด้วย Compose จึงยังไม่ใช่ขั้นตอนตั้งค่า STAFF/Web Push ที่ครบ ให้ใช้วิธี Maven ข้างต้นสำหรับการทดลองฟีเจอร์เหล่านี้ หรือปรับ environment ของ container ก่อนใช้
 
-```bash
-for test in test/js/*.test.cjs; do node "$test" || exit 1; done
-mvn clean verify
-```
-
-PostgreSQL tests ใช้ embedded database แยกจากฐานข้อมูลแอป ไม่ต้องรัน Compose เพื่อทดสอบ CI ตรวจทั้ง JS และ Maven และเก็บ Surefire reports; ไม่มีการ deploy อัตโนมัติ
-
-ผลตรวจเดิมอยู่ใน [test report](doc/test-report.md) และผลรวม Push/owner/security ใหม่อยู่ใน [Push test report](doc/push-test-report.md) Module tests ที่ใช้ access/token fixtures ยังยืนยันเฉพาะส่วนธุรกิจ ส่วน full API tests ใหม่ใช้ security/CSRF/owner implementation จริงกับ PostgreSQL และจำลองเฉพาะ provider; ไม่มีหลักฐานว่าอุปกรณ์แสดง Push จริงจากผลอัตโนมัติ
-
-## เจ้าของงาน
-
-| สมาชิก | ส่วนรับผิดชอบ |
-|---|---|
-| กานดิทัต | หน้าเว็บ ตะกร้า ประวัติ/ติดตามคิว หน้าจอพนักงาน QR และ runtime/CI |
-| อนันเอก | schema/migration, persistence, เมนู/ภาพเมนู, ออเดอร์และเลขคิวรายวัน |
-| คมชาญ | State, เปลี่ยนสถานะ/ยกเลิกคิว, token, สิทธิ์ออเดอร์, security และ CSRF |
-| ธีธัช | Subscription, Observer, Strategy/sender, delivery, Log และ Browser Push |
+ยังไม่มี cloud database หรือ deployment URL ที่ตั้งค่าและยืนยันแล้ว การเผยแพร่ต้องกำหนด HTTPS, database, secrets/environment และตรวจ acceptance บนปลายทางก่อนส่งมอบ ดู [Deployment diagram](doc/diagrams/deployment.md) และ [Acceptance](doc/acceptance.md)
 
 ## Development workflow
 
-- main: รุ่นพร้อมส่งมอบ
-- develop: รวมงานระหว่างพัฒนา
-- สมาชิกทำงานบน branch ส่วนตัว
-- รวมงานผ่าน Pull Request และมีสมาชิกอีกคนรีวิว
+- `main`: รุ่นพร้อมส่งมอบ
+- `develop`: รวมงานระหว่างพัฒนา
+- สมาชิกทำงานและ push บน branch ของตนเอง
+- รวมงานผ่าน Pull Request และให้สมาชิกอีกคน review/approve ก่อน merge
 
-ดู [handover](doc/handover.md), [acceptance](doc/acceptance.md), [ER](doc/diagrams/er.md) และ [migration](doc/migration.md) สไลด์จะจัดทำกับทีมภายหลัง
-
-## ตั้งค่าแจ้งเตือนและพนักงาน
-
-ดู [Push delivery/handover](doc/push-delivery.md), [sequence READY](doc/diagrams/sequence-ready.md) และ [sequence subscribe](doc/diagrams/sequence-subscribe.md)
-`NOTIFICATION_MODE=console` เป็น preview และค่า `webpush` ใช้ VAPID settings จาก environment รหัสผ่าน STAFF ว่างทำให้ล็อกอินไม่ได้ ไม่มี default credential ที่ใช้งานได้
-Demo เปิดเฉพาะ profile `push-demo` และ STAFF ที่ `/push-demo.html`; ต้องใช้ CSRF และเป็น provider test แยกจากข้อมูลออเดอร์/production log
-PREVIEW ไม่ส่ง provider ส่วน ACCEPTED หมายถึง provider รับคำขอเท่านั้น ไม่ยืนยัน device display
+ดู [Handover](doc/handover.md) และ [Team review](doc/team-review.md) โดยตรวจ baseline ของแต่ละเอกสาร งานถัดไปคือปรับเอกสารประกอบที่ยังล้าสมัย เลือกและตั้งค่าการเผยแพร่ ทำ final acceptance และจัดเตรียมสไลด์/หลักฐานส่งงาน
