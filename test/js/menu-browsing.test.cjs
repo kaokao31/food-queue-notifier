@@ -6,6 +6,9 @@ const root = path.resolve(process.argv[2] || path.join(__dirname, '../..'));
 const context = vm.createContext({document:{querySelector:()=>null},setTimeout:()=>{}});
 for (const name of ['core-ui.js','menu-ui.js']) vm.runInContext(fs.readFileSync(path.join(root,'code/src/main/resources/static/assets',name),'utf8'),context);
 const {CoreUI,MenuUI}=context;
+const storedPhoto={id:8,name:'ข้าวกะเพราไก่',category:'อาหารจานเดียว',imageUrl:'/assets/food/basil-chicken-v2.webp'};
+assert.equal(MenuUI.foodPhoto({...storedPhoto,name:'test',category:'เครื่องดื่ม'}),storedPhoto.imageUrl);
+assert.equal(MenuUI.foodPhoto({...storedPhoto,name:'test',imageUrl:'/api/v1/menu-items/8/image?v=uploaded'}),'/api/v1/menu-items/8/image?v=uploaded');
 function elements() {
  const categories={html:'',buttons:[],get innerHTML(){return this.html;},set innerHTML(value){this.html=value;this.buttons=[...value.matchAll(/<button[^>]*>(.*?)<\/button>/g)].map(m=>({textContent:m[1]}));},querySelectorAll(){return this.buttons;}};
  return {categories,grid:{},sort:{value:'name,asc'},prev:{},next:{},pageInfo:{}};
