@@ -5,6 +5,7 @@ import com.kku.queuenotify.config.WebPushProperties;
 import com.kku.queuenotify.dto.request.PushSubscriptionRequest;
 import com.kku.queuenotify.dto.response.PushPayload;
 import com.kku.queuenotify.exception.PushDemoException;
+import com.kku.queuenotify.service.PushConfigurationService;
 import com.kku.queuenotify.service.SubscriptionValidator;
 import com.kku.queuenotify.service.WebPushSender;
 import java.math.BigInteger;
@@ -31,18 +32,20 @@ public class BrowserWebPushSender implements WebPushSender {
   @FunctionalInterface
   interface Transport { int send(HttpPost encryptedRequest) throws Exception; }
   private final WebPushProperties properties;
+  private final PushConfigurationService configurationService;
   private final SubscriptionValidator validator;
   private final ObjectMapper json;
   private final Transport transport;
 
   @Autowired
-  public BrowserWebPushSender(WebPushProperties properties, SubscriptionValidator validator, ObjectMapper json) {
-    this(properties, validator, json, BrowserWebPushSender::sendHttp);
+  public BrowserWebPushSender(WebPushProperties properties, PushConfigurationService configurationService,
+      SubscriptionValidator validator, ObjectMapper json) {
+    this(properties, configurationService, validator, json, BrowserWebPushSender::sendHttp);
   }
   // Test seam replaces only HTTP transport; validation, encryption and signing still run.
-  BrowserWebPushSender(WebPushProperties properties, SubscriptionValidator validator,
-      ObjectMapper json, Transport transport) {
-    this.properties=properties; this.validator=validator; this.json=json; this.transport=transport;
+  BrowserWebPushSender(WebPushProperties properties, PushConfigurationService configurationService,
+      SubscriptionValidator validator, ObjectMapper json, Transport transport) {
+    this.configurationService=configurationService; this.properties=properties; this.validator=validator; this.json=json; this.transport=transport;
   }
 
   @Override public int sendTest(PushSubscriptionRequest subscription) {
@@ -73,7 +76,7 @@ public class BrowserWebPushSender implements WebPushSender {
 
   private String[] validatedSettings() {
     try {
-      String publicKey=new PushConfigurationServiceImpl(properties).getPublicKey();
+      String publicKey=configurationService.getPublicKey();
       String privateKey=properties.getPrivateKey();
       String subject=properties.getSubject();
       if (privateKey==null || !privateKey.trim().matches("[A-Za-z0-9_-]{43}=?")
